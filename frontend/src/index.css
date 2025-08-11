@@ -1,191 +1,222 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* =========================
+   Base + Theme Variables
+   ========================= */
+:root{
+  --brand:#2eacca;
+  --text:#213547;
+  --muted:#505369;
+  --bg:#ffffff;
+  --halo:#f0f2f5;
+  --halo-hover:#e8eefc;
+  --divider:#e9edf3;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  --radius-lg:999px;
+  --radius:12px;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Fluid typography */
+  --fs-300: clamp(.9rem, .85rem + .2vw, 1rem);
+  --fs-400: clamp(1rem, .95rem + .4vw, 1.125rem);
+  --fs-700: clamp(1.6rem, 1.2rem + 2.2vw, 3rem);
+
+  /* Spacing scale (fluid) */
+  --sp-1: clamp(.25rem, .2rem + .3vw, .5rem);
+  --sp-2: clamp(.5rem, .35rem + .5vw, .75rem);
+  --sp-3: clamp(.75rem, .5rem + .7vw, 1rem);
+  --sp-4: clamp(1rem, .75rem + 1vw, 1.5rem);
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+*,
+*::before,
+*::after{ box-sizing:border-box; }
 
-body {
-  margin: 0;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
+html, body{ height:100%; }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+body{
+  margin:0;
+  color:var(--text);
+  background:var(--bg);
+  font-family:system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
+/* Links */
+a{ color:#646cff; text-decoration:none; font-weight:500; }
+a:hover{ color:#535bf2; }
 
-
-
-/* Burger animation (prefix with x- to avoid collisions) */
-.x-burger-toggle { line-height: 1; }
-
-.x-burger {
-  position: relative;
-  width: 22px;
-  height: 16px;
-  display: inline-block;
-}
-
-.x-burger-bar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  border-radius: 1px;
-  background: currentColor;
-  transition:
-    transform 200ms ease,
-    opacity 150ms ease,
-    top 200ms ease,
-    bottom 200ms ease;
-}
-
-/* positions */
-.x-burger-bar.top    { top: 0;    }
-.x-burger-bar.middle { top: 7px;  }
-.x-burger-bar.bottom { top: 14px; }
-
-/* when open, turn into an X */
-.x-burger-toggle.is-open .x-burger-bar.top {
-  transform: translateY(7px) rotate(45deg);
-}
-.x-burger-toggle.is-open .x-burger-bar.middle {
-  opacity: 0;
-  transform: scaleX(0.2);
-}
-.x-burger-toggle.is-open .x-burger-bar.bottom {
-  transform: translateY(-7px) rotate(-45deg);
-}
+/* Headings – fluid sizes */
+h1{ font-size:var(--fs-700); line-height:1.1; }
+h2{ font-size:calc(var(--fs-700) * .7); }
+h3{ font-size:calc(var(--fs-700) * .55); }
 
 /* Respect reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .x-burger-bar { transition: none; }
+@media (prefers-reduced-motion: reduce){
+  *{ animation:none !important; transition:none !important; scroll-behavior:auto !important; }
 }
 
+/* =========================
+   Navbar + Search
+   ========================= */
+.navbar-line{ flex-wrap:nowrap; }
+.brand-logo{ height:clamp(28px, 3.5vw, 40px); width:auto; display:block; }
 
+/* Search sizing becomes fluid */
+.search-wrap{ min-width:260px; max-width:clamp(420px, 55vw, 700px); }
+.search-shell{ height:clamp(36px, 4.2vw, 44px); width:100%; }
 
-/* keep everything on one line until it truly can't fit */
-.navbar-line { flex-wrap: nowrap; }
-
-/* logo sizing (adjust to your asset) */
-.brand-logo {
-  height: 40px;
-  width: auto;
-  display: block;
-}
-/* make the search fill remaining width */
-.search-wrap { min-width: 260px; }
-.search-wrap {max-width: 700px;}
-.search-shell {
-  height: 40px;
-}
-/* optional: on very small screens, allow wrap so nothing overflows */
-@media (max-width: 576px) {
-  .navbar-line { flex-wrap: wrap; }
-  .search-wrap { order: 3; width: 100%; margin-top: .5rem; }
-}
-
-
-
-/* Shell just ensures full-width on small screens */
-.search-shell { width: 100%; }
-
-/* The pill container */
-.searchbar {
-  background: #cfcfcf;               /* light grey like the screenshot */
-  border: none;
-  height: 40px;                       /* adjust to match your design */
-  padding: 0px 4px;                   /* space for the inner controls */
-  box-shadow: inset 0 0 0 0 rgba(0,0,0,0);
+.searchbar{
+  background:#cfcfcf;
+  border:none;
+  height:100%;
+  padding:0 var(--sp-1);
+  box-shadow:inset 0 0 0 0 rgba(0,0,0,0);
   transition: box-shadow .15s ease, background-color .15s ease;
 }
-
-/* Improve focus state for accessibility */
-.searchbar:focus-within {
-  background: #d6d6d6;
-  box-shadow: 0 0 0 2px rgba(46, 172, 202, .5); /* subtle green ring */
+.searchbar:focus-within{
+  background:#d6d6d6;
+  box-shadow:0 0 0 2px color-mix(in srgb, var(--brand) 50%, transparent);
 }
 
-/* The input matches the pill and removes Bootstrap borders */
-.search-input {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  color: #2b2b2b;
-  padding-left: 14px;
-  font-size: 16px;
+.search-input{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  color:#2b2b2b;
+  padding-left:14px;
+  font-size:var(--fs-400);
+}
+.search-input::placeholder{ color:var(--muted); }
+
+.search-btn{
+  width:clamp(36px, 4.5vw, 44px);
+  height:clamp(36px, 4.5vw, 44px);
+  margin-right:4px;
+  border:0 !important;
+  background:transparent !important;
+  color:var(--brand);
+  padding:0;
+}
+.search-btn:focus-visible{ outline:2px solid var(--brand); outline-offset:2px; }
+
+/* Small screens: allow wrapping; search goes full width */
+@media (max-width:576px){
+  .navbar-line{ flex-wrap:wrap; }
+  .search-wrap{ order:3; width:100%; margin-top:.5rem; }
 }
 
-.search-input::placeholder {
-  color: #505369;                     /* muted placeholder */
+/* =========================
+   Cart button
+   ========================= */
+.cart-btn-custom{
+  border:2px solid var(--brand);
+  color:var(--brand);
+  background:transparent;
 }
-
-/* The magnifying glass button */
-.search-btn {
-  width: 44px;
-  height: 44px;
-  margin-right: 4px;
-  border: 0 !important;
-  background: transparent !important;
-  color: #2eacca;                      /* green stroke like screenshot */
-  padding: 0;
-}
-
-.search-btn:focus-visible {
-  outline: 2px solid #2eacca;
-  outline-offset: 2px;
-}
-
-/* Keep layout tight on very small screens */
-@media (max-width: 400px) {
-  .searchbar { height: 44px; }
-  .search-btn { width: 40px; height: 40px; }
-}
-
-
-/*Cart button design*/
-.cart-btn-custom {
-  border: 2px solid #2eacca;
-  color: #2eacca;
-  background-color: transparent;
-}
-
 .cart-btn-custom:hover,
-.cart-btn-custom:focus {
-  background-color: #2eacca;
-  color: #fff;
-  border-color: #2eacca;
+.cart-btn-custom:focus{
+  background:var(--brand);
+  color:#fff;
+  border-color:var(--brand);
+}
+
+/* =========================
+   Burger animation (namespaced)
+   ========================= */
+.x-burger-toggle{ line-height:1; }
+.x-burger{ position:relative; width:22px; height:16px; display:inline-block; }
+.x-burger-bar{
+  position:absolute; left:0; right:0; height:2px; border-radius:1px;
+  background: currentColor;
+  transition: transform 200ms ease, opacity 150ms ease, top 200ms ease, bottom 200ms ease;
+}
+.x-burger-bar.top{ top:0; }
+.x-burger-bar.middle{ top:7px; }
+.x-burger-bar.bottom{ top:14px; }
+.x-burger-toggle.is-open .x-burger-bar.top{ transform:translateY(7px) rotate(45deg); }
+.x-burger-toggle.is-open .x-burger-bar.middle{ opacity:0; transform:scaleX(.2); }
+.x-burger-toggle.is-open .x-burger-bar.bottom{ transform:translateY(-7px) rotate(-45deg); }
+
+/* =========================
+   Category Strip (one-line, scroll on overflow)
+   ========================= */
+.cat-strip-wrap{ border-bottom:1px solid var(--divider); }
+.cat-strip-wrap .container{ position:relative; }
+
+/* Track stays one line; spacing scales with viewport */
+.cat-track{
+  display:flex; flex-wrap:nowrap; gap:clamp(.75rem, 1.5vw, 1.25rem);
+  overflow-x:auto; overflow-y:hidden;
+  padding:.5rem 0 .75rem;
+  scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.cat-track::-webkit-scrollbar{ display:none; }
+
+/* Items scale with viewport */
+.cat-card{
+  flex:0 0 auto;
+  min-width:clamp(120px, 16vw, 160px);
+  background:transparent; border:0;
+  text-align:center; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:.5rem;
+  user-select:none;
+}
+.cat-icon{
+  display:grid; place-items:center;
+  width:clamp(52px, 6vw, 64px);
+  height:clamp(52px, 6vw, 64px);
+  border-radius:var(--radius-lg);
+  background:var(--halo);
+  font-size:clamp(22px, 3vw, 28px);
+  transition: transform .15s ease, background-color .15s ease, box-shadow .15s ease;
+}
+.cat-title{
+  font-size:var(--fs-300);
+  font-weight:700;
+  color:#0a1a5c;
+  line-height:1.2;
+}
+.cat-card:focus-visible .cat-icon,
+.cat-card:hover .cat-icon{
+  background:var(--halo-hover);
+  transform:translateY(-2px);
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+
+/* Arrow buttons: visible at all sizes; larger on wide screens */
+.cat-nav{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:clamp(32px, 4vw, 40px); height:clamp(32px, 4vw, 40px);
+  border-radius:var(--radius-lg);
+  border:1px solid #d6dbe6; background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  color:#111; font-size:20px; line-height:1;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  z-index:3;
+}
+.cat-nav.left{ left:8px; }
+.cat-nav.right{ right:8px; }
+.cat-nav:focus-visible{ outline:2px solid var(--brand); outline-offset:2px; }
+.cat-nav:disabled{ opacity:.35; pointer-events:none; }
+
+/* Tighten vertical rhythm on very small screens */
+@media (max-width:400px){
+  .cat-title{ font-size: .8rem; }
+}
+
+/* =========================
+   Optional dark scheme (keeps site white by default)
+   ========================= */
+@media (prefers-color-scheme: dark){
+  :root{
+    /* uncomment to support dark mode later
+    --bg:#242424;
+    --text:rgba(255,255,255,.92);
+    --halo:#2E3140;
+    --halo-hover:#3A3D4E;
+    --divider:#2a2a2a;
+    */
+  }
 }

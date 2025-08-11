@@ -1,8 +1,10 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  max-width: none;      /* remove 1280px cap */
+  margin: 0;            /* no auto-centering margin */
+  padding: 0;           /* no big gutter */
+  text-align: initial;  /* stop centering all text */
+  min-height: 100vh;    /* full viewport height */
+  background: #fff;     /* force white app surface */
 }
 
 .logo {

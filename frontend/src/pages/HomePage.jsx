@@ -1,5 +1,5 @@
 import Navbar from "../components/Navbar";
-
+import CategoryStrip from "../components/CategoryStrip";
 
 function HomePage() {
   return (
@@ -13,9 +13,9 @@ function HomePage() {
           fontSize: "3rem",
           marginTop: "3rem",
         }}
-      >
-        Welcome to the homepage!
-      </div>
+      ></div>
+
+      <CategoryStrip onSelect={(id) => console.log("Selected:", id)} />
     </>
   );
 }

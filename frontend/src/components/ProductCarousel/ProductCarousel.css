@@ -1,0 +1,38 @@
+/* inside ProductCarousel.css */
+.product-carousel .scroll-lane {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.25rem 0.5rem;
+  scroll-snap-type: x mandatory;   /* important */
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.product-carousel .scroll-card {
+  flex: 0 0 80%;     /* almost full-width on small phones */
+  scroll-snap-align: start;
+}
+@media (min-width: 576px) {
+  .product-carousel .scroll-card { flex-basis: 50%; }    /* 2 per view */
+}
+@media (min-width: 768px) {
+  .product-carousel .scroll-card { flex-basis: 33.333%; }/* 3 per view */
+}
+
+
+
+.product-carousel .five-up {
+  display: flex;
+  gap: 1rem;
+}
+.product-carousel .five-up > .item {
+  flex: 0 0 20%;    /* 5 equal cards */
+  min-width: 0;
+}
+
+
+.deal-badge {
+  z-index: 2;           /* force it above the image */
+  position: absolute;   /* already set by Bootstrap utility */
+}

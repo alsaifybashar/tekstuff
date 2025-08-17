@@ -220,3 +220,19 @@ h3{ font-size:calc(var(--fs-700) * .55); }
     */
   }
 }
+
+
+
+
+
+/* Keep card img behavior consistent */
+.object-fit-contain { object-fit: contain; }
+.object-fit-cover { object-fit: cover; }
+
+/* Slightly larger carousel controls for product rows */
+.carousel-control-prev, .carousel-control-next {
+  width: 4rem;
+}
+
+
+

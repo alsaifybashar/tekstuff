@@ -1,0 +1,9 @@
+.footer-dark {
+  background: #0e1a4a;           /* deep navy like your example */
+  color: #e9edf7;
+}
+.footer-dark .text-secondary { color: rgba(255,255,255,.6) !important; }
+.footer-dark a.link-light { color: #e9edf7; text-decoration: none; }
+.footer-dark a.link-light:hover { text-decoration: underline; }
+
+.footer-features .feature { color: #e9edf7; }

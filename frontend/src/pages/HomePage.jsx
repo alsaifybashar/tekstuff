@@ -5,6 +5,8 @@ import Container from "react-bootstrap/Container";
 import ProductCarousel from "../components/ProductCarousel/ProductCarousel";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import Footer from "../components/Footer/Footer";
+
 
 const deals = [
   {
@@ -131,7 +133,20 @@ function HomePage() {
         </Row>
       </Container>
 
+      
       <ProductCarousel title="Super Deals" products={deals} />
+
+      
+      <br></br>
+      <hr class="w-25 mx-auto my-4"></hr>
+      <ProductCarousel title="Nyheter" products={deals} />
+
+      <br></br>
+      <hr class="w-25 mx-auto my-4"></hr>
+      <ProductCarousel title="Populära produkter" products={deals} />
+
+
+      <Footer />
     </>
   );
 }

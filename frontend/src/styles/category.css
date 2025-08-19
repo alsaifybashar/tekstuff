@@ -1,0 +1,4 @@
+/* subtle spacing & card polish */
+.card { border-radius: 12px; }
+.card img { transition: transform .25s ease; }
+.card:hover img { transform: scale(1.02); }

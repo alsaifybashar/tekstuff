@@ -6,6 +6,7 @@ import ProductCarousel from "../components/ProductCarousel/ProductCarousel";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Footer from "../components/Footer/Footer";
+import { motion } from "framer-motion";
 
 
 const deals = [
@@ -17,7 +18,6 @@ const deals = [
     subtitle: "Finns i andra varianter",
     price: "5490:-",
     oldPrice: "9995:-",
-    
   },
 
   {
@@ -28,7 +28,6 @@ const deals = [
     subtitle: "Finns i andra varianter",
     price: "5490:-",
     oldPrice: "9995:-",
-    
   },
 
   {
@@ -39,7 +38,6 @@ const deals = [
     subtitle: "Finns i andra varianter",
     price: "5490:-",
     oldPrice: "9995:-",
-    
   },
   {
     badge: "SUPER DEAL",
@@ -49,7 +47,6 @@ const deals = [
     subtitle: "Finns i andra varianter",
     price: "5490:-",
     oldPrice: "9995:-",
-    
   },
   {
     badge: "SUPER DEAL",
@@ -59,7 +56,6 @@ const deals = [
     subtitle: "Finns i andra varianter",
     price: "5490:-",
     oldPrice: "9995:-",
-    
   },
   {
     badge: "SUPER DEAL",
@@ -69,7 +65,6 @@ const deals = [
     subtitle: "Finns i andra varianter",
     price: "5490:-",
     oldPrice: "9995:-",
-    
   },
   {
     badge: "SUPER DEAL",
@@ -79,7 +74,6 @@ const deals = [
     subtitle: "Finns i andra varianter",
     price: "5490:-",
     oldPrice: "9995:-",
-    
   },
   {
     badge: "SUPER DEAL",
@@ -89,7 +83,6 @@ const deals = [
     subtitle: "Finns i andra varianter",
     price: "5490:-",
     oldPrice: "9995:-",
-    
   },
   {
     badge: "SUPER DEAL",
@@ -99,7 +92,6 @@ const deals = [
     subtitle: "Finns i andra varianter",
     price: "5490:-",
     oldPrice: "9995:-",
-    
   },
   {
     badge: "SUPER DEAL",
@@ -109,7 +101,6 @@ const deals = [
     subtitle: "Finns i andra varianter",
     price: "5490:-",
     oldPrice: "9995:-",
-    
   },
 ];
 
@@ -133,10 +124,15 @@ function HomePage() {
         </Row>
       </Container>
 
-      
-      <ProductCarousel title="Super Deals" products={deals} />
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <ProductCarousel title="Super Deals" products={deals} />
+      </motion.div>
 
-      
       <br></br>
       <hr class="w-25 mx-auto my-4"></hr>
       <ProductCarousel title="Nyheter" products={deals} />
@@ -144,7 +140,6 @@ function HomePage() {
       <br></br>
       <hr class="w-25 mx-auto my-4"></hr>
       <ProductCarousel title="Populära produkter" products={deals} />
-
 
       <Footer />
     </>

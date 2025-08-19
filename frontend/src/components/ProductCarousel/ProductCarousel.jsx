@@ -3,6 +3,23 @@ import "./ProductCarousel.css";
 import Carousel from "react-bootstrap/Carousel";
 import Container from "react-bootstrap/Container";
 import ProductCard from "../ProductCard";
+import { motion } from "framer-motion";
+
+const containerStagger = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06, delayChildren: 0.05 },
+  },
+};
+const itemFade = {
+  hidden: { opacity: 0, y: 16 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
+  },
+};
 
 // chunk helper
 const chunk = (arr, size) =>
@@ -29,18 +46,32 @@ export default function ProductCarousel({
         <Carousel
           className="product-carousel"
           indicators={false}
-          nextIcon={<span aria-hidden="true" className="text-dark fs-2">›</span>}
-          prevIcon={<span aria-hidden="true" className="text-dark fs-2">‹</span>}
+          nextIcon={
+            <span aria-hidden="true" className="text-dark fs-2">
+              ›
+            </span>
+          }
+          prevIcon={
+            <span aria-hidden="true" className="text-dark fs-2">
+              ‹
+            </span>
+          }
         >
           {slides.map((group, idx) => (
             <Carousel.Item key={idx}>
-              <div className="five-up">
+              <motion.div
+                className="five-up"
+                variants={containerStagger}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.2 }}
+              >
                 {group.map((p) => (
-                  <div className="item" key={p.id}>
+                  <motion.div className="item" key={p.id} variants={itemFade}>
                     <ProductCard {...p} />
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             </Carousel.Item>
           ))}
         </Carousel>
@@ -48,13 +79,19 @@ export default function ProductCarousel({
 
       {/* Mobile scroll lane */}
       <div className="product-carousel d-lg-none">
-        <div className="scroll-lane">
-          {sorted.map((p) => (
-            <div className="scroll-card" key={p.id}>
+        <motion.div
+          className="scroll-lane"
+          variants={containerStagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
+        >
+          {products.map((p) => (
+            <motion.div className="scroll-card" key={p.id} variants={itemFade}>
               <ProductCard {...p} />
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </Container>
   );

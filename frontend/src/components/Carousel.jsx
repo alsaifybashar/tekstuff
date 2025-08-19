@@ -1,5 +1,8 @@
 // src/components/UncontrolledExample.jsx
 import Carousel from "react-bootstrap/Carousel";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+
 
 const slides = [
   { src: "src/assets/image1.avif", alt: "Featured product one", captionH: "First slide label", captionP: "Nulla vitae elit libero, a pharetra augue mollis interdum." },
@@ -7,26 +10,19 @@ const slides = [
   { src: "src/assets/mac.webp", alt: "Featured product three", captionH: "Third slide label", captionP: "Praesent commodo cursus magna, vel scelerisque nisl consectetur." },
 ];
 
-export default function UncontrolledExample() {
+
+export default function ControlledCarousel() {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  // Move up slightly and fade as page scrolls
+  const y = useTransform(scrollYProgress, [0, 1], [0, -60]);
+  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.85]);
+
   return (
-    <Carousel>
-      {slides.map((s, i) => (
-        <Carousel.Item key={s.src}>
-          <img
-            src={s.src}
-            alt={s.alt}
-            className="d-block w-100"
-            loading={i === 0 ? "eager" : "lazy"}
-            decoding="async"
-            sizes="(min-width: 992px) 960px, 100vw"
-            fetchpriority={i === 0 ? "high" : "auto"}
-          />
-          <Carousel.Caption>
-            <h3>{s.captionH}</h3>
-            <p>{s.captionP}</p>
-          </Carousel.Caption>
-        </Carousel.Item>
-      ))}
-    </Carousel>
+    <motion.div ref={ref} style={{ y, opacity, willChange: "transform, opacity" }}>
+      <Carousel /* your props, custom arrows */>
+        {/* slides with <img className="d-block w-100" /> etc. */}
+      </Carousel>
+    </motion.div>
   );
 }

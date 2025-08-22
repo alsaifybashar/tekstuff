@@ -7,7 +7,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Footer from "../components/Footer/Footer";
 import { motion } from "framer-motion";
-
+import TopBanner from "../components/TopBanner"; // Importing TopBanner component
 
 const deals = [
   {
@@ -33,7 +33,7 @@ const deals = [
   {
     badge: "SUPER DEAL",
     id: "hp-15",
-    image: "src/assets/telefon.avif",
+    image: "src/assets/charger/laddare1.webp",
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
     price: "5490:-",
@@ -107,7 +107,15 @@ const deals = [
 function HomePage() {
   return (
     <>
+      <TopBanner
+        message="Missa inte våra Flash Deals!"
+        href="/flash-deals"
+        linkLabel="Klicka här"
+        endsAtISO="2025-09-10T21:00:00Z"
+        colorClass="bg-primary"
+      />
       <Navbar />
+
 
       {/* page spacing */}
       <div style={{ height: "2rem" }} />

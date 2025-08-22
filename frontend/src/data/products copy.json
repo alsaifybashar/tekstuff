@@ -12,6 +12,11 @@
     "attrs": { "type": "Charger", "connector": "USB‑C", "cableLength": "No cable" },
     "image": "src/assets/dator.avif"
   },
+
+
+
+
+  
   {
     "id": "sign-usb-c-cable-1m",
     "category": "cables",
@@ -482,3 +487,6 @@
 }
 
 ]
+
+
+

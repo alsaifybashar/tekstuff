@@ -7,7 +7,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Dropdown from "react-bootstrap/Dropdown";
 
-import allProducts from "../data/products.json";           // ← Vite lets you import JSON
+import allProducts from "../data/products.js";           // ← Vite lets you import JSON
 import { buildFacets, applyFilters } from "../lib/catalog";
 import FilterSidebar from "../components/FilterSidebar";
 import ProductGrid from "../components/ProductGrid";
@@ -19,7 +19,8 @@ export default function CategoryPage() {
 
 
   const map = { laptops: "laptops", phones: "phones", chargers: "chargers", cables: "cables" };
-const key = map[categorySlug?.toLowerCase()] ?? categorySlug?.toLowerCase();
+
+  const key = map[categorySlug?.toLowerCase()] ?? categorySlug?.toLowerCase();
 const products = useMemo(() => allProducts.filter(p => p.category.toLowerCase() === key), [key]);
 
   // Narrow products to this category (dummy data)

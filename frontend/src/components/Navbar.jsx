@@ -8,6 +8,8 @@ import HamburgerMenu from "./HamburgerMenu";
 import SearchBar from "./SearchBar";
 import CartButton from "./CartButton";
 
+import logo from "../assets/react.svg"; 
+
 export default function Navbar() {
   return (
     <RBNavbar
@@ -24,7 +26,7 @@ export default function Navbar() {
               to="/"
               className="d-flex align-items-center text-decoration-none"
             >
-              <img src="src/assets/react.svg" alt="TekStuff" className="brand-logo me-1" />
+              <img src={logo} alt="TekStuff" className="brand-logo me-1" />
             </RBNavbar.Brand>
             <HamburgerMenu label="Meny" />
           </Col>

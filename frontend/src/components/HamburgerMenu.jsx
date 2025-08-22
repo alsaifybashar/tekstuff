@@ -36,7 +36,7 @@ export default function HamburgerMenu() {
 
       <Dropdown.Menu className="shadow" style={{ minWidth: 280 }}>
         <Dropdown.Header>Electronics</Dropdown.Header>
-        <Dropdown.Item as={NavLink} to="/c/phones">Phones</Dropdown.Item>
+        <Dropdown.Item as={NavLink} to="/c/chargers">Chargers</Dropdown.Item>
         <Dropdown.Item as={NavLink} to="/c/laptops">Laptops</Dropdown.Item>
         <Dropdown.Item as={NavLink} to="/c/accessories">Accessories</Dropdown.Item>
         <Dropdown.Divider />

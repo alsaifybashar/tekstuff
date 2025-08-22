@@ -14,7 +14,7 @@ export default function Footer() {
             <Col md>
               <div className="feature">
                 <i className="bi bi-bag fs-1 d-block" aria-hidden="true"></i>
-                <div className="fw-semibold">Boka & hämta inom 30 min</div>
+                <div className="fw-semibold">Säkra produkter - EU-standard</div>
               </div>
             </Col>
             <Col md>
@@ -26,7 +26,7 @@ export default function Footer() {
             <Col md>
               <div className="feature">
                 <i className="bi bi-bullseye fs-1 d-block" aria-hidden="true"></i>
-                <div className="fw-semibold">Prismatch</div>
+                <div className="fw-semibold">Snabb leverans</div>
               </div>
             </Col>
           </Row>

@@ -1,3 +1,4 @@
+import imgBiggerLaddare from "../assets/charger/bigger_chargare.webp";
 import imgLaddare1 from "../assets/charger/laddare1.webp";
 import imgLaddare2 from "../assets/charger/laddare2.webp";
 import imgLaddare3 from "../assets/charger/laddare3.webp";
@@ -16,225 +17,65 @@ import imgLaddare15 from "../assets/charger/laddare15.webp";
 import imgLaddare16 from "../assets/charger/laddare16.webp";
 import imgLaddare17 from "../assets/charger/laddare17.webp";
 import imgLaddare18 from "../assets/charger/laddare18.webp";
+import { desc } from "framer-motion/client";
 
 
 
 export default [
   {
-    id: "sign-usb-c-20w",
+    id: "sign-usb-c-20w-white",
+    title: "SIGN USB-C PD Laddare 20W – Vit",
+    // slug is optional; if you add the slugify helper in catalog it’ll be auto-generated from title
+    slug: "sign-usb-c-pd-laddare-20w-vit",
+
+    // Classification
     category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 200,
-    oldPrice: 149,
-    brand: "Apple",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare1,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 250,
-    oldPrice: 149,
-    brand: "Apple",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare2,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "Samsung",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 130,
-    oldPrice: 149,
+    // categories: ["chargers"], // alternative shape if you prefer arrays
     brand: "SIGN",
-    rating: 5,
+    sku: "SIGN-20W-USB-C-WHT",
+
+    // Pricing & stock
+    price: 199,
+    oldPrice: 249,
     inStock: true,
     isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare3,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 111,
-    oldPrice: 149,
-    brand: "Samsung",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare4,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 89,
-    oldPrice: 149,
-    brand: "SIGN",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare5,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 89,
-    oldPrice: 149,
-    brand: "SIGN",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare6,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 59,
-    oldPrice: 149,
-    brand: "SIGN",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare7,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 250,
-    oldPrice: 149,
-    brand: "SIGN",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare8,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 300,
-    oldPrice: 149,
-    brand: "Nexus",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "1m" },
-    image: imgLaddare9,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 130,
-    oldPrice: 149,
-    brand: "Nexus",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "2m" },
-    image: imgLaddare10,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 119,
-    oldPrice: 149,
-    brand: "Nexus",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare11,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 119,
-    oldPrice: 149,
-    brand: "SIGN",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare12,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 119,
-    oldPrice: 149,
-    brand: "SIGN",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare13,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 119,
-    oldPrice: 149,
-    brand: "SIGN",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare14,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 119,
-    oldPrice: 149,
-    brand: "SIGN",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare15,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 119,
-    oldPrice: 149,
-    brand: "SIGN",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare16,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 119,
-    oldPrice: 149,
-    brand: "SIGN",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare17,        // ✅ hashed URL provided by bundler
-  },{
-    id: "sign-usb-c-20w",
-    category: "chargers",
-    title: "SIGN USB‑C PD Laddare 20W – Vit",
-    price: 119,
-    oldPrice: 149,
-    brand: "SIGN",
-    rating: 5,
-    inStock: true,
-    isDeal: true,
-    attrs: { type: "Charger", connector: "USB‑C", cableLength: "No cable" },
-    image: imgLaddare18,        // ✅ hashed URL provided by bundler
+
+    // Media
+    image: imgLaddare1,
+    images: [
+      imgBiggerLaddare,
+      imgLaddare1,
+      imgLaddare2,
+      imgLaddare3
+    ],
+
+    // Content
+    description: "Kompakt 20W USB-C PD-laddare för iPhone/Android med snabbladdning.",
+    longDescription:
+      "Snabbladdare på 20W med USB-C Power Delivery (PD). Passar iPhone 8 eller senare och de flesta Android-enheter som stöder PD. Överströmsskydd och temperaturkontroll för säker laddning. EU-kontakt.",
+
+    // Specs (go straight to “Specifications” tab)
+    specs: {
+      Effekt: "20W",
+      Standard: "USB-C PD 3.0",
+      Ingång: "100–240V ~ 50/60Hz",
+      Utgång: "5V/3A, 9V/2.22A, 12V/1.67A",
+      Mått: "42×40×24 mm",
+      Vikt: "48 g",
+      Färg: "Vit",
+      Garanti: "2 år",
+      Kompatibilitet: "iPhone, iPad, Android, USB-C enheter"
+    },
+
+    // Ratings & marketing
+    rating: 4.7,
+    tags: ["snabbladdare", "usb-c", "20w"],
+
+    // Facets / attributes used by filters
+    attrs: {
+      type: "Charger",
+      connector: "USB-C",
+      cableLength: "No cable"
+    }
   }
 ];

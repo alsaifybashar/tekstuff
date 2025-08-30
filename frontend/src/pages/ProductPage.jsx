@@ -11,6 +11,7 @@ import ProductGrid from '../components/ProductGrid'; // or ProductCarousel
 import Navbar from '../components/Navbar';
 
 import ProductCarousel from '../components/ProductCarousel/ProductCarousel';
+import { title } from 'framer-motion/client';
 
 
 const chargers_relatedproducts = [
@@ -121,7 +122,7 @@ export default function ProductPage() {
   if (!product) {
     return (
       <div className="container py-5">
-        <h1 className="h3">Product not found</h1>
+        <h1 className="h3">Produkten hittades inte</h1>
         <p className="text-muted">We couldn’t find a product with slug: <code>{productSlug}</code>.</p>
         <Link to="/" className="btn btn-primary mt-2">Back to Home</Link>
       </div>
@@ -129,6 +130,7 @@ export default function ProductPage() {
   }
 
   const {
+    title,
     name,
     price,
     oldPrice,
@@ -145,14 +147,15 @@ export default function ProductPage() {
   } = product;
 
   const stockBadge = inStock
-    ? <span className="badge bg-success">In stock</span>
-    : <span className="badge bg-secondary">Out of stock</span>;
+    ? <span className="badge bg-success">Finns i lager</span>
+    : <span className="badge bg-secondary">Slut i lager</span>;
 
   const categorySlug = category ?? (Array.isArray(categories) ? categories[0] : undefined);
 
   return (
     <>
       <Navbar />
+
       <br></br>
       <br></br>
 
@@ -172,22 +175,27 @@ export default function ProductPage() {
 
         <div className="row g-4">
           {/* Gallery */}
-          <div className="col-12 col-lg-6 d-flex justify-content-center align-items-center">
+          <div className="col-12 col-lg-6 d-flex justify-content-center text-center">
             <ProductImageGallery images={images} alt={name} />
           </div>
+
+
 
 
           {/* Summary / Buy box */}
           <div className="col-12 col-lg-6">
             <h1 className="h3 mb-2">{name}</h1>
             <div className="d-flex align-items-center gap-2 mb-2">
-              {brand && <span className="text-muted">by {brand}</span>}
-              {sku && <span className="text-muted">· SKU {sku}</span>}
+              <h3><strong>{title}</strong></h3>
+            </div>
+
+            <div>
+              {sku && <span className="text-muted"> SKU. {sku}</span>}
             </div>
 
             <div className="d-flex align-items-center gap-3 mb-3">
-              <div className="h4 mb-0">€{Number(price).toFixed(2)}</div>
-              {oldPrice && <div className="text-muted text-decoration-line-through">€{Number(oldPrice).toFixed(2)}</div>}
+              <div className="h4 mb-0">SEK{Number(price).toFixed(2)}</div>
+              {oldPrice && <div className="text-muted text-decoration-line-through">SEK{Number(oldPrice).toFixed(2)}</div>}
               {stockBadge}
             </div>
 
@@ -207,7 +215,7 @@ export default function ProductPage() {
                 disabled={!inStock}
                 onClick={() => addItem(product, qty)}
               >
-                Add to cart
+                Lägg i varukorg
               </button>
             </div>
 
@@ -257,7 +265,7 @@ export default function ProductPage() {
             sku,
             offers: {
               '@type': 'Offer',
-              priceCurrency: 'EUR',
+              priceCurrency: 'SEK',
               price: String(price),
               availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'
             },

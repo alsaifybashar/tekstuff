@@ -46,7 +46,16 @@ export default [
       imgBiggerLaddare,
       imgLaddare1,
       imgLaddare2,
-      imgLaddare3
+      imgLaddare3,
+      imgLaddare4,
+      imgLaddare5,
+      imgLaddare6,
+      imgLaddare7,
+      imgLaddare8,
+      imgLaddare9,
+      imgLaddare10,
+      imgLaddare11,
+      imgLaddare12,
     ],
 
     // Content

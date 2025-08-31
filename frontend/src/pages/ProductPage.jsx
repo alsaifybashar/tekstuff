@@ -19,9 +19,8 @@ import StickyBuyBar from "../components/StickyBuyBar";
 
 // ✅ correct file path
 import ProductCarousel from "../components/ProductCarousel/ProductCarousel";
-
 import productNum from "../data/products";
-
+import Footer from "../components/Footer/Footer";
 
 const packageProducts = [
   { id: "tape", title: "SiGN LCD Tejp", image: "src/assets/charger/laddare1.webp", price: "49 kr" },
@@ -37,7 +36,7 @@ export default function ProductPage() {
   const { slug } = useParams();
   const product = useMemo(() => getProductBySlug(slug), [slug]);
   const related = useMemo(() => getRelatedProducts(product, 8), [product]);
-  const { addItem } = useCart();
+  const { add } = useCart();
   const [qty, setQty] = useState(1);
 
   if (!product) {
@@ -105,7 +104,7 @@ export default function ProductPage() {
                 type="button"
                 className="btn btn-dark btn-lg"
                 disabled={!inStock}
-                onClick={() => addItem(product, qty)}
+                onClick={() => add(product.id, qty)}
               >
                 Lägg i varukorg
               </button>
@@ -148,7 +147,7 @@ export default function ProductPage() {
         name={displayName}
         price={price}
         canBuy={inStock}
-        onAdd={() => addItem(product, 1)}
+        onAdd={() => add(product.id, 1)}
       />
 
       <br />
@@ -157,7 +156,10 @@ export default function ProductPage() {
       <ProductCarousel title="Liknande produkter" products={related?.length ? related : productNum} />
 
 
+      <br></br>
+      <br></br>
 
+      <Footer />
 
     </>
   );

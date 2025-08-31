@@ -1,0 +1,64 @@
+/* src/components/ProductCard.css */
+
+/* Subtle hover + consistent spacing */
+.product-card {
+    transition: transform .2s ease, box-shadow .2s ease;
+    border-radius: 0.75rem;
+}
+
+.product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(16, 24, 40, .06);
+}
+
+/* Image stage: fixed visual area, white background, no crop */
+.product-thumb {
+    background: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, .05);
+    display: grid;
+    place-items: center;
+    /* Give a stable height across cards (responsive): */
+    height: clamp(160px, 24vw, 220px);
+    padding: 12px;
+    /* some breathing room around the product */
+}
+
+.product-thumb-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    /* ⟵ KEY: do not crop */
+    display: block;
+}
+
+/* Placeholder if image missing */
+.product-thumb-placeholder {
+    color: #98a2b3;
+    font-size: .875rem;
+}
+
+/* Deal badge sits over the image area */
+.product-badge {
+    position: absolute;
+    top: .5rem;
+    left: .5rem;
+    z-index: 2;
+}
+
+/* 2-line clamp for long titles */
+.product-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+
+.card-img-top {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+    /* or cover */
+    background-color: #fff;
+    /* helps when image has transparency */
+}

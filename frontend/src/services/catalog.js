@@ -1,56 +1,73 @@
 // src/services/catalog.js
-import productsArr from '../data/products';
+import products from "../data/products"; // <- your products.js default export (array)
 
-// Tiny helper
+// --- utils ---
 const slugify = (s) =>
-  String(s || '')
+  String(s || "")
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 
-const PRODUCTS = (Array.isArray(productsArr) ? productsArr : []).map((p) => ({
+// Normalize: ensure every product has a slug, keep original fields intact
+export const PRODUCTS = (Array.isArray(products) ? products : []).map((p) => ({
   ...p,
-  slug: p.slug || slugify(p.title || p.name || p.id), // ← ensure slug
+  slug: p.slug || slugify(p.title || p.name || p.id),
 }));
 
+// Fast indexes
+export const productIndex = new Map(PRODUCTS.map((p) => [p.id, p]));
+export const slugIndex = new Map(PRODUCTS.map((p) => [p.slug, p]));
+
+// ========== Queries ==========
+
+// All products
 export function getAllProducts() {
   return PRODUCTS;
 }
 
+// Category listing (default export to keep existing imports working)
 export default function getProductsByCategory(categorySlug, limit) {
+  const key = String(categorySlug || "").toLowerCase();
   const items = PRODUCTS.filter((p) => {
-    if (p.category) return p.category.toLowerCase() === categorySlug?.toLowerCase();
+    if (p.category) return String(p.category).toLowerCase() === key;
     if (Array.isArray(p.categories))
-      return p.categories.map((c) => String(c).toLowerCase()).includes(categorySlug?.toLowerCase());
+      return p.categories.map((c) => String(c).toLowerCase()).includes(key);
     return false;
   });
-  return typeof limit === 'number' ? items.slice(0, limit) : items;
+  return typeof limit === "number" ? items.slice(0, limit) : items;
 }
 
-// New: fetch one product by slug
+// One product by slug
 export function getProductBySlug(slug) {
-  return PRODUCTS.find((p) => p.slug === slug);
+  return slugIndex.get(slug);
 }
 
-// New: simple related-products (same category, exclude self)
+// One product by id
+export function getProductById(id) {
+  return productIndex.get(id);
+}
+
+// Related (same category; prefer same brand; exclude self)
 export function getRelatedProducts(product, limit = 8) {
   if (!product) return [];
   const categoryKey = product.category ?? (Array.isArray(product.categories) ? product.categories[0] : null);
-  const pool = categoryKey
-    ? PRODUCTS.filter((p) => p !== product && (p.category === categoryKey || p.categories?.includes(categoryKey)))
-    : PRODUCTS.filter((p) => p !== product);
 
-  // naive score: prefer same brand first
+  const pool = categoryKey
+    ? PRODUCTS.filter(
+        (p) => p.id !== product.id && (p.category === categoryKey || p.categories?.includes(categoryKey))
+      )
+    : PRODUCTS.filter((p) => p.id !== product.id);
+
   const scored = pool
-    .map((p) => ({ p, score: (p.brand && product.brand && p.brand === product.brand) ? 2 : 1 }))
+    .map((p) => ({ p, score: p.brand && product.brand && p.brand === product.brand ? 2 : 1 }))
     .sort((a, b) => b.score - a.score)
     .map((x) => x.p);
 
   return scored.slice(0, limit);
 }
 
-// Handy for homepage (kept)
+// Deals
 export function getDeals(limit) {
   const items = PRODUCTS.filter((p) => p.isDeal);
-  return typeof limit === 'number' ? items.slice(0, limit) : items;
+  return typeof limit === "number" ? items.slice(0, limit) : items;
 }

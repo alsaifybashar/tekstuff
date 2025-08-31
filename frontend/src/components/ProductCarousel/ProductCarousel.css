@@ -36,3 +36,12 @@
   z-index: 2;           /* force it above the image */
   position: absolute;   /* already set by Bootstrap utility */
 }
+
+
+/* e.g. in ProductCarousel.css or a ProductCard.css you import in ProductCard */
+.card-img-top {
+  width: 100%;
+  height: 200px;
+  object-fit: contain; /* keeps full product visible */
+  background: #fff;
+}

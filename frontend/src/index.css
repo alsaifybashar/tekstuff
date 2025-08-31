@@ -269,3 +269,14 @@ h3{ font-size:calc(var(--fs-700) * .55); }
   animation: sweep 2.2s cubic-bezier(.22,1,.36,1) infinite;
 }
 @keyframes sweep { to { transform: translateX(100%); } }
+
+
+
+
+/* make product images feel lighter */
+.object-fit-contain { object-fit: contain; }
+
+/* keep page bottom safe above sticky bar on mobile */
+@media (max-width: 991.98px) {
+  body { padding-bottom: 74px; } /* height of StickyBuyBar */
+}

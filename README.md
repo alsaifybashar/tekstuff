@@ -17,7 +17,7 @@ In this project we are building a webshop that is based on react frontend. The f
 # todo
 
 ## Core Customer-Facing
-
+Most of the goals under this section is done! Missing the search function whcih will later be added together with the REST API
 - **Home** — `/`
 - **Search results** — `/search?q=…`
 - **Category listing** — `/c/:categorySlug`

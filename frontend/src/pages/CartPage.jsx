@@ -1,86 +1,122 @@
-import { useMemo } from "react";
+// src/pages/CartPage.jsx
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import { useCart } from "../context/CartContext";
-import { getProductById } from "../services/catalog";
+import Alert from "react-bootstrap/Alert";
+
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer/Footer";
 import ProductCarousel from "../components/ProductCarousel/ProductCarousel";
-import { Plus, Minus, Trash2 } from "lucide-react";
-import './CartPage.css';
 
+import { useCart } from "../context/CartContext";
+import { api } from "../services/api";
 
-
-
-const deals = [
+// Optional: fallback carousel data (until you wire a "popular" endpoint)
+const fallbackDeals = [
   {
     badge: "SUPER DEAL",
     id: "hp-15",
-    image: "src/assets/react.svg",
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6″",
+    image: "/images/hp15.jpg",
+    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
+    price: "5490",
+    oldPrice: "9995",
   },
   {
     badge: "SUPER DEAL",
-    id: "hp-15",
-    image: "src/assets/dator.avif",
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6″",
-    subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
-  },
-  {
-    badge: "SUPER DEAL",
-    id: "hp-15",
-    image: "src/assets/charger/laddare1.webp",
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6″",
-    subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
-  },
-  {
-    badge: "SUPER DEAL",
-    id: "hp-15",
-    image: "src/assets/tvattmaskin.avif",
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6″",
-    subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
-  },
-  {
-    badge: "SUPER DEAL",
-    id: "hp-15",
-    image: "src/assets/tv.avif",
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6″",
-    subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
+    id: "anker-65w",
+    image: "/images/charger/laddare1.webp",
+    title: "Anker PowerPort III 65W Charger",
+    subtitle: "Snabbladdare",
+    price: "499",
+    oldPrice: "699",
   },
 ];
 
-export default function CartPage() {
-  const { items, setQty, remove, clear } = useCart();
+const kr = new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 0 });
 
-  const rows = useMemo(() => {
-    return Object.entries(items).map(([id, qty]) => {
-      const p = getProductById(id);
-      return p ? { ...p, qty } : null;
-    }).filter(Boolean);
+export default function CartPage() {
+  const { items, setQty, remove, clear } = useCart(); // items: { [productId]: qty }
+  const [rows, setRows] = useState([]);               // rows: [{...product, qty, price:number}]
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState(null);
+
+  // Load product details for current cart (parallel + dedupe)
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setErr(null);
+      try {
+        const entries = Object.entries(items).filter(([, q]) => (Number(q) || 0) > 0);
+
+        if (!entries.length) {
+          if (!cancelled) setRows([]);
+          return;
+        }
+
+        // Deduplicate product IDs to avoid duplicate fetches
+        const uniqueIds = [...new Set(entries.map(([id]) => id))];
+
+        const results = await Promise.allSettled(
+          uniqueIds.map((id) => api.getProductById(id))
+        );
+
+        // Map id -> product
+        const byId = new Map();
+        results.forEach((res, i) => {
+          const id = uniqueIds[i];
+          if (res.status === "fulfilled" && res.value) {
+            const p = res.value;
+            byId.set(id, {
+              ...p,
+              // Normalize numeric fields to avoid NaN
+              price: Number(p.price) || 0,
+              oldPrice: p.oldPrice != null ? Number(p.oldPrice) : undefined,
+            });
+          } else {
+            console.error("Failed to fetch product", id, res.reason);
+          }
+        });
+
+        // Build rows in the same order as cart entries
+        const next = entries
+          .map(([id, qty]) => {
+            const p = byId.get(id);
+            if (!p) return null;
+            return {
+              ...p,
+              qty: Math.max(0, Math.floor(Number(qty) || 0)),
+            };
+          })
+          .filter(Boolean);
+
+        if (!cancelled) setRows(next);
+      } catch (e) {
+        if (!cancelled) setErr(e.message || "Något gick fel vid hämtning.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => { cancelled = true; };
   }, [items]);
 
   const totals = useMemo(() => {
-    const subtotal = rows.reduce((sum, r) => sum + r.price * r.qty, 0);
-    const vat = Math.round(subtotal * 0.20); // 20% Swedish VAT
-    const total = subtotal;
-    return { subtotal, vat, total };
+    const subtotal = rows.reduce(
+      (sum, r) => sum + (Number(r.price) || 0) * (Number(r.qty) || 0),
+      0
+    );
+    return { subtotal };
   }, [rows]);
 
+  const fmt = (n) => `${kr.format(Math.round(Number(n) || 0))} kr`;
+
+  // Empty cart UI (keeps your design)
   if (!rows.length) {
     return (
       <div className="d-flex flex-column min-vh-100">
@@ -99,8 +135,9 @@ export default function CartPage() {
               Fortsätt handla
             </Button>
           </div>
+
           <div className="container">
-            <ProductCarousel title="Populära produkter" products={deals} />
+            <ProductCarousel title="Populära produkter" products={fallbackDeals} />
           </div>
         </main>
         <Footer />
@@ -111,170 +148,108 @@ export default function CartPage() {
   return (
     <div className="d-flex flex-column min-vh-100">
       <Navbar />
-      
-      <main className="flex-grow-1 bg-light">
-        <Container fluid="xl" className="py-4">
-          {/* Header */}
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <div>
-              <h1 className="h3 mb-1">DIN KUNDVAGN ({rows.length} PRODUKTER)</h1>
-              <small className="text-muted">ID: 1669461122</small>
-            </div>
-            <div className="d-flex gap-2">
-              <Button 
-                as={Link} 
-                to="/" 
-                variant="outline-secondary"
-                className="d-flex align-items-center gap-2"
+
+      <main className="flex-grow-1">
+        <div className="container py-4">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h1 className="h4 m-0">Kundvagn</h1>
+            <Button variant="outline-danger" onClick={clear} disabled={loading}>
+              Töm kundvagnen
+            </Button>
+          </div>
+
+          {err ? (
+            <Alert variant="danger" className="mb-3">
+              {err}
+            </Alert>
+          ) : null}
+
+          <Table responsive bordered hover className="align-middle">
+            <thead>
+              <tr>
+                <th>Produkt</th>
+                <th style={{ width: 120 }}>Pris</th>
+                <th style={{ width: 140 }}>Antal</th>
+                <th style={{ width: 140 }}>Summa</th>
+                <th style={{ width: 70 }} aria-label="Ta bort" />
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => {
+                const lineTotal = (Number(row.price) || 0) * (Number(row.qty) || 0);
+                return (
+                  <tr key={row.id}>
+                    <td className="d-flex gap-3 align-items-center">
+                      <img
+                        src={row.image || row.images?.[0]}
+                        alt={row.title || row.name || "Produkt"}
+                        width="64"
+                        height="64"
+                        style={{ objectFit: "cover" }}
+                        loading="lazy"
+                      />
+                      <div>
+                        <div className="fw-semibold">{row.title || row.name || "Produkt"}</div>
+                        {row.brand ? <div className="text-muted small">{row.brand}</div> : null}
+                      </div>
+                    </td>
+
+                    <td>{fmt(row.price)}</td>
+
+                    <td>
+                      <Form.Control
+                        type="number"
+                        min={0}
+                        value={row.qty}
+                        disabled={loading}
+                        onChange={(e) => {
+                          const v = Math.max(0, Math.floor(Number(e.target.value) || 0));
+                          setQty(row.id, v);
+                        }}
+                        aria-label={`Antal för ${row.title || row.name || row.id}`}
+                      />
+                    </td>
+
+                    <td>{fmt(lineTotal)}</td>
+
+                    <td>
+                      <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        onClick={() => remove(row.id)}
+                        disabled={loading}
+                      >
+                        Ta bort
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </Table>
+
+          <div className="d-flex justify-content-end">
+            <div className="border rounded p-3" style={{ minWidth: 320 }}>
+              <div className="d-flex justify-content-between">
+                <span className="fw-semibold">Delsumma</span>
+                <span>{fmt(totals.subtotal)}</span>
+              </div>
+              <div className="text-muted small mt-1">
+                Frakt och moms tillkommer i nästa steg.
+              </div>
+              <Button
+                variant="primary"
+                className="w-100 mt-3"
+                style={{ paddingLeft: "2rem" }}
+                disabled={loading}
               >
-                ← Fortsätt handla
-              </Button>
-              <Button 
-                variant="success"
-                size="lg"
-                className="px-4"
-              >
-                Fortsätt till kassan
+                {loading ? "Uppdaterar..." : "Till kassan"}
               </Button>
             </div>
           </div>
-
-          <Row className="g-4">
-            {/* Cart Items */}
-            <Col lg={8}>
-              <div className="bg-white rounded-3 shadow-sm">
-                {rows.map((row, index) => (
-                  <div 
-                    key={row.id} 
-                    className={`d-flex align-items-center p-4 ${
-                      index !== rows.length - 1 ? 'border-bottom' : ''
-                    }`}
-                  >
-                    {/* Product Image */}
-                    <div className="flex-shrink-0 me-3">
-                      <img 
-                        src={row.image} 
-                        alt={row.title}
-                        width="80" 
-                        height="80" 
-                        className="rounded"
-                        style={{ objectFit: "contain", backgroundColor: "#f8f9fa" }}
-                      />
-                    </div>
-
-                    {/* Product Info */}
-                    <div className="flex-grow-1 me-3">
-                      <h6 className="mb-1 fw-semibold">{row.title}</h6>
-                      <div className="d-flex align-items-center gap-1 text-success small">
-                        <span className="rounded-circle bg-success" style={{ width: "8px", height: "8px" }}></span>
-                        I lager
-                      </div>
-                    </div>
-
-                    {/* Quantity Controls */}
-                    <div className="d-flex align-items-center gap-3 me-4">
-                      <div className="d-flex align-items-center border rounded">
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="border-0 text-dark p-2"
-                          onClick={() => setQty(row.id, Math.max(0, row.qty - 1))}
-                          style={{ lineHeight: 1 }}
-                        >
-                          <Minus size={16} />
-                        </Button>
-                        <span className="px-3 py-1 border-start border-end" style={{ minWidth: "50px", textAlign: "center" }}>
-                          {row.qty}
-                        </span>
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="border-0 text-dark p-2"
-                          onClick={() => setQty(row.id, row.qty + 1)}
-                          style={{ lineHeight: 1 }}
-                        >
-                          <Plus size={16} />
-                        </Button>
-                      </div>
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className="text-danger p-1"
-                        onClick={() => remove(row.id)}
-                        aria-label="Ta bort produkt"
-                      >
-                        <Trash2 size={18} />
-                      </Button>
-                    </div>
-
-                    {/* Price */}
-                    <div className="text-end">
-                      <div className="fw-bold fs-5">{row.price * row.qty}:-</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Col>
-
-            {/* Order Summary */}
-            <Col lg={4}>
-              {/* Member Benefits */}
-              <div className="bg-warning bg-opacity-10 rounded-3 p-4 mb-4 border border-warning border-opacity-25">
-                <div className="fw-semibold mb-2">
-                  FÅ MER SOM <span className="text-success">MEDLEM</span>
-                </div>
-                <ul className="small mb-3 ps-3">
-                  <li>Exklusiva klubbdeals & rabatter</li>
-                  <li>100 kr presentkort för köp över 5000 kr</li>
-                  <li>Förtur till kampanjer & Black Friday</li>
-                </ul>
-                <Button variant="success" className="w-100" size="sm">
-                  Logga in / Registrera dig
-                </Button>
-              </div>
-
-              {/* Order Summary */}
-              <div className="bg-white rounded-3 shadow-sm p-4">
-                <div className="d-flex justify-content-between mb-3">
-                  <span className="fw-semibold">Orderöversikt</span>
-                  <div className="text-end">
-                    <div className="fw-semibold">Delbetalning</div>
-                    <small className="text-muted">Pris visas i kassan</small>
-                  </div>
-                </div>
-
-                <hr />
-
-                <div className="d-flex justify-content-between mb-2">
-                  <span>Leveransmetod</span>
-                  <span>Pris visas i kassan</span>
-                </div>
-                
-                <div className="d-flex justify-content-between mb-3">
-                  <span>Moms</span>
-                  <span>{totals.vat.toFixed(2)}</span>
-                </div>
-
-                <hr />
-
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                  <span className="text-muted">Totalbelopp SEK</span>
-                  <span className="fs-2 fw-bold">{totals.total}:-</span>
-                </div>
-
-                <Button 
-                  variant="success" 
-                  size="lg" 
-                  className="w-100"
-                >
-                  Fortsätt till kassan
-                </Button>
-              </div>
-            </Col>
-          </Row>
-        </Container>
+        </div>
       </main>
-      
+
       <Footer />
     </div>
   );

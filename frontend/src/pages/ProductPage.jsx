@@ -1,166 +1,234 @@
 // src/pages/ProductPage.jsx
-import React, { useMemo, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { getProductBySlug, getRelatedProducts } from "../services/catalog";
-import ProductImageGallery from "../components/ProductImageGallery";
-import QuantityPicker from "../components/QuantityPicker";
-import SpecsTable from "../components/SpecsTable";
-import { useCart } from "../context/CartContext";
-import ProductGrid from "../components/ProductGrid";
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import Badge from "react-bootstrap/Badge";
+import Button from "react-bootstrap/Button";
+import Alert from "react-bootstrap/Alert";
+import Spinner from "react-bootstrap/Spinner";
+
 import Navbar from "../components/Navbar";
-import Tabs from "react-bootstrap/Tabs";
-import Tab from "react-bootstrap/Tab";
-
-import RatingStars from "../components/RatingStars";
-import TrustBadges from "../components/TrustBadges";
-import PriceBlock from "../components/PriceBlock";
-import BundleBox from "../components/BundleBox";
-import StickyBuyBar from "../components/StickyBuyBar";
-
-// ✅ correct file path
-import ProductCarousel from "../components/ProductCarousel/ProductCarousel";
-import productNum from "../data/products";
 import Footer from "../components/Footer/Footer";
+import ProductImageGallery from "../components/ProductImageGallery";
+import PriceBlock from "../components/PriceBlock";
+import QuantityPicker from "../components/QuantityPicker";
+import ProductCarousel from "../components/ProductCarousel/ProductCarousel";
 
-const packageProducts = [
-  { id: "tape", title: "SiGN LCD Tejp", image: "src/assets/charger/laddare1.webp", price: "49 kr" },
-  { id: "tool", title: "Verktygskit iPhone – 7 delar", image: "src/assets/charger/laddare2.webp", price: "59 kr" },
-];
+import { useCart } from "../context/CartContext";
+import { api } from "../services/api";
 
-
-
-
-
+const kr = new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 0 });
 
 export default function ProductPage() {
-  const { slug } = useParams();
-  const product = useMemo(() => getProductBySlug(slug), [slug]);
-  const related = useMemo(() => getRelatedProducts(product, 8), [product]);
+  const { slug } = useParams(); // route: /p/:slug
   const { add } = useCart();
+
+  const [product, setProduct] = useState(null);
   const [qty, setQty] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState(null);
 
-  if (!product) {
-    return (
-      <div className="container py-5">
-        <h1 className="h3">Produkten hittades inte</h1>
-        <p className="text-muted">
-          We couldn’t find a product with slug: <code>{slug}</code>.
-        </p>
-        <Link to="/" className="btn btn-primary mt-2">Back to Home</Link>
-      </div>
-    );
-  }
+  const [related, setRelated] = useState([]);
 
-  const {
-    title, name, price, oldPrice, images = [],
-    description, longDescription, specs, brand,
-    rating, reviewsCount, inStock = true, category, categories, sku,
-  } = product;
+  useEffect(() => {
+    let cancelled = false;
 
-  const categorySlug = category ?? (Array.isArray(categories) ? categories[0] : undefined);
-  const displayName = name || title;
+    async function load() {
+      setLoading(true);
+      setErr(null);
+      setProduct(null);
+      try {
+        // 1) Try fetch by "id" (slug may equal id in some datasets)
+        let p = null;
+        try {
+          p = await api.getProductBySlug(slug);
+        } catch (_) {
+          // ignore (may be 404)
+        }
+
+        // 2) If not found, list products and match by slug field
+        if (!p) {
+          const list = await api.listProducts(); // { items, ... }
+          p = list.items?.find((x) => x.slug === slug);
+        }
+
+        if (!p) {
+          throw new Error("Produkten hittades inte.");
+        }
+
+        // Normalize numerics
+        p.price = Number(p.price) || 0;
+        if (p.oldPrice != null) p.oldPrice = Number(p.oldPrice);
+
+        if (!cancelled) {
+          setProduct(p);
+          // Fetch simple related suggestions (same brand or deals)
+          try {
+            const list2 = await api.listProducts();
+            const suggestions = (list2.items || [])
+              .filter((x) => x.id !== p.id)
+              .filter((x) => (x.brand && p.brand ? x.brand === p.brand : x.isDeal || p.isDeal))
+              .slice(0, 12);
+            if (!cancelled) setRelated(suggestions);
+          } catch {
+            /* non-blocking */
+          }
+        }
+      } catch (e) {
+        if (!cancelled) setErr(e.message || "Något gick fel.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  const addToCart = () => {
+    if (!product?.id) return;
+    add(product.id, Math.max(1, Math.floor(qty || 1)));
+  };
+
+  const specs = useMemo(() => {
+    // Optional area for simple spec rendering if backend sends attrs later.
+    // Return array of [label, value]
+    const rows = [];
+    if (product?.brand) rows.push(["Märke", product.brand]);
+    if (product?.slug) rows.push(["Artikel", product.slug]);
+    return rows;
+  }, [product]);
 
   return (
-    <>
+    <div className="d-flex flex-column min-vh-100">
       <Navbar />
 
-      <div className="container py-4">
-        {/* Breadcrumb */}
-        <nav aria-label="breadcrumb" className="mb-3">
-          <ol className="breadcrumb">
-            <li className="breadcrumb-item"><Link to="/">Home</Link></li>
-            {categorySlug && (
-              <li className="breadcrumb-item"><Link to={`/c/${categorySlug}`}>{categorySlug}</Link></li>
-            )}
-            <li className="breadcrumb-item active" aria-current="page">{displayName}</li>
-          </ol>
-        </nav>
-
-        <div className="row g-4">
-          {/* Left: Gallery with vertical thumbs (your component already supports it) */}
-          <div className="col-12 col-lg-6 d-flex justify-content-center text-center">
-            <ProductImageGallery images={images} alt={displayName} />
-          </div>
-
-          {/* Right: Buy box */}
-          <div className="col-12 col-lg-6">
-            <h1 className="h3 mb-2">{displayName}</h1>
-            <RatingStars value={rating ?? 0} count={reviewsCount} />
-
-            <div className="mt-2">{sku && <small className="text-muted">SKU: {sku}</small>}</div>
-
-            {/* Price + discount */}
-            <PriceBlock price={price} oldPrice={oldPrice} />
-
-            {/* Availability pill */}
-            <div className={`badge ${inStock ? "bg-success" : "bg-secondary"} mb-3`}>
-              {inStock ? "Lagervara för omgående leverans" : "Slut i lager"}
+      <main className="flex-grow-1">
+        <Container fluid="xl" className="py-4">
+          {loading && (
+            <div className="d-flex align-items-center gap-2">
+              <Spinner animation="border" size="sm" />
+              <span>Laddar produkt…</span>
             </div>
+          )}
 
-            {/* Qty + Add */}
-            <div className="d-flex align-items-center gap-3 my-3">
-              <QuantityPicker value={qty} onChange={setQty} min={1} max={99} />
-              <button
-                type="button"
-                className="btn btn-dark btn-lg"
-                disabled={!inStock}
-                onClick={() => add(product.id, qty)}
-              >
-                Lägg i varukorg
-              </button>
-            </div>
+          {err && !loading && (
+            <Alert variant="danger">{err}</Alert>
+          )}
 
-            {/* Trust badges */}
-            <TrustBadges />
+          {!loading && !err && product && (
+            <>
+              <Row className="g-4">
+                {/* Left: images */}
+                <Col xs={12} md={6} lg={6}>
+                  <ProductImageGallery
+                    images={product.images?.length ? product.images : [product.image].filter(Boolean)}
+                    alt={product.title || product.name || "Produkt"}
+                  />
+                </Col>
 
-            {/* Bundle box (upsells) */}
-            <BundleBox products={packageProducts} onAdd={() => packageProducts.forEach(u => addItem(u, 1))} />
+                {/* Right: title, price, actions */}
+                <Col xs={12} md={6} lg={6}>
+                  <div className="d-flex align-items-center gap-2 mb-2">
+                    {product.isDeal && (
+                      <Badge bg="danger">SUPER DEAL</Badge>
+                    )}
+                    {product.inStock ? (
+                      <Badge bg="success">I lager</Badge>
+                    ) : (
+                      <Badge bg="secondary">Ej i lager</Badge>
+                    )}
+                  </div>
 
+                  <h1 className="h4 mb-1">
+                    {product.title || product.name || "Produkt"}
+                  </h1>
+                  {product.brand && (
+                    <div className="text-muted mb-2">{product.brand}</div>
+                  )}
 
-            {/* Tabs: info/specs */}
-            <Tabs defaultActiveKey="desc" className="mt-3">
-              <Tab eventKey="desc" title="Produktinformation">
-                <div className="border border-top-0 p-3 rounded-bottom">
-                  <p className="mb-0">{longDescription || description}</p>
-                </div>
-              </Tab>
-              <Tab eventKey="specs" title="Specifikationer">
-                <div className="border border-top-0 p-3 rounded-bottom">
-                  <SpecsTable specs={specs} />
-                </div>
-              </Tab>
-            </Tabs>
-          </div>
-        </div>
+                  <PriceBlock price={product.price} oldPrice={product.oldPrice} />
 
-        {/* Related slider */}
-        {related?.length > 0 && (
-          <section className="mt-5">
-            <h2 className="h5 mb-3">Relaterade produkter</h2>
-            <ProductGrid products={related} />
-          </section>
-        )}
-      </div>
+                  <div className="d-flex align-items-center gap-3 mb-3">
+                    <QuantityPicker value={qty} onChange={setQty} min={1} max={99} />
+                    <Button
+                      variant="dark"
+                      size="lg"
+                      disabled={!product.inStock}
+                      onClick={addToCart}
+                    >
+                      Lägg i kundvagn
+                    </Button>
+                  </div>
 
-      {/* Sticky buy bar on mobile */}
-      <StickyBuyBar
-        name={displayName}
-        price={price}
-        canBuy={inStock}
-        onAdd={() => add(product.id, 1)}
-      />
+                  {/* Simple facts/specs */}
+                  {specs.length > 0 && (
+                    <div className="border rounded p-3">
+                      <h2 className="h6 mb-3">Specifikationer</h2>
+                      <dl className="row mb-0">
+                        {specs.map(([k, v]) => (
+                          <div className="col-12 d-flex" key={k}>
+                            <dt className="me-2 text-muted" style={{ width: 120 }}>{k}</dt>
+                            <dd className="mb-1">{String(v)}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
+                  )}
+                </Col>
+              </Row>
 
-      <br />
+              {/* Description block (optional if you add it to backend later) */}
+              {product.description && (
+                <Row className="g-4 mt-3">
+                  <Col md={12}>
+                    <div className="border rounded p-3">
+                      <h2 className="h6 mb-2">Produktbeskrivning</h2>
+                      <p className="mb-0">{product.description}</p>
+                    </div>
+                  </Col>
+                </Row>
+              )}
 
-      {/* “Liknande produkter” carousel block (demo data) */}
-      <ProductCarousel title="Liknande produkter" products={related?.length ? related : productNum} />
-
-
-      <br></br>
-      <br></br>
+              {/* Related / Similar products */}
+              <Row className="mt-4">
+                <Col>
+                  <ProductCarousel
+                    title="Liknande produkter"
+                    products={toCarouselProducts(related)}
+                  />
+                </Col>
+              </Row>
+            </>
+          )}
+        </Container>
+      </main>
 
       <Footer />
-
-    </>
+    </div>
   );
+}
+
+/**
+ * Adapt generic product objects to your ProductCarousel's expected shape.
+ * Carousel items typically need: { badge?, id, image, title, subtitle?, price, oldPrice? }
+ */
+function toCarouselProducts(items = []) {
+  return items.map((p) => ({
+    badge: p.isDeal ? "SUPER DEAL" : undefined,
+    id: p.id,
+    image: p.image || p.images?.[0],
+    title: p.title || p.name || "Produkt",
+    subtitle: p.brand || "",
+    price: toKr(p.price),
+    oldPrice: p.oldPrice != null ? toKr(p.oldPrice) : undefined,
+  }));
+}
+
+function toKr(n) {
+  const v = Math.round(Number(n) || 0);
+  return String(v); // ProductCarousel in your codebase prints "kr" itself or in parent
 }

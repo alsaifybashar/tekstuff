@@ -1,90 +1,56 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT_MS ?? 8000);
-const WITH_CREDENTIALS = (import.meta.env.VITE_API_WITH_CREDENTIALS ?? "true") === "true"; // default true to match your current behavior
+// src/lib/http.js
+const DEFAULT_TIMEOUT = 12_000;
+const RETRY_STATUS = new Set([502, 503, 504]);
 
-const etags = new Map();
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-function buildUrl(path, query) {
-  const url = new URL(path.replace(/^\//, ""), BASE_URL);
-  if (query) {
-    Object.entries(query).forEach(([k, v]) => {
-      if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
-    });
-  }
-  return url.toString();
-}
-
-async function withTimeout(run, ms) {
+export async function http(path, init = {}, { timeout = DEFAULT_TIMEOUT, retries = 2 } = {}) {
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), ms);
+  const id = setTimeout(() => ctrl.abort(), timeout);
+  const base = import.meta.env.VITE_API_URL || "";
+  const url = `${base}${path}`;
+
   try {
-    return await run(ctrl.signal);
-  } finally {
-    clearTimeout(t);
-  }
-}
+    let attempt = 0;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        const res = await fetch(url, {
+          credentials: "include",
+          headers: { "Content-Type": "application/json", ...(init.headers || {}) },
+          signal: ctrl.signal,
+          ...init,
+        });
 
-async function parseJsonSafe(resp) {
-  const text = await resp.text();
-  try {
-    return text ? JSON.parse(text) : null;
-  } catch {
-    throw new Error("Invalid JSON received from server.");
-  }
-}
+        const contentType = res.headers.get("content-type") || "";
+        const isJSON = contentType.includes("application/json");
+        const body = isJSON ? await res.json().catch(() => undefined) : await res.text().catch(() => undefined);
 
-export async function httpGet(path, options = {}) {
-  if (!BASE_URL) throw new Error("Missing VITE_API_BASE_URL");
+        if (!res.ok) {
+          if (RETRY_STATUS.has(res.status) && attempt < retries) {
+            attempt++;
+            await sleep(300 * attempt);
+            continue;
+          }
+          const err = new Error(`HTTP ${res.status} for ${url}`);
+          err.status = res.status;
+          err.url = url;
+          err.body = body;
+          throw err;
+        }
 
-  const url = buildUrl(path, options.query);
-  const retries = options.retries ?? 1;
-  let attempt = 0;
-
-  while (true) {
-    const headers = { Accept: "application/json" };
-    const tag = etags.get(url);
-    if (tag) headers["If-None-Match"] = tag;
-
-    try {
-      const res = await withTimeout(
-        (signal) =>
-          fetch(url, {
-            method: "GET",
-            headers,
-            mode: "cors",
-            credentials: WITH_CREDENTIALS ? "include" : "omit",
-            signal,
-          }),
-        TIMEOUT_MS
-      );
-
-      if (res.status === 304) return { data: null, status: 304, fromCache: true };
-
-      if (!res.ok) {
-        if ((res.status >= 500 || res.status === 429) && attempt < retries) {
+        return body;
+      } catch (e) {
+        const networky = e?.name === "AbortError" || String(e?.message || "").toLowerCase().includes("network");
+        if (networky && attempt < retries) {
           attempt++;
-          await sleep(300 * 2 ** (attempt - 1));
+          await sleep(300 * attempt);
           continue;
         }
-        const body = await parseJsonSafe(res).catch(() => ({}));
-        throw new Error((body && body.message) || `HTTP ${res.status}`);
+        throw e;
       }
-
-      const data = await parseJsonSafe(res);
-      const newTag = res.headers.get("ETag");
-      if (newTag) etags.set(url, newTag);
-
-      return { data, status: res.status, fromCache: false };
-    } catch (err) {
-      const isAbort = err?.name === "AbortError";
-      const transient = isAbort || /NetworkError|fetch failed/i.test(err?.message || "");
-      if (transient && attempt < retries) {
-        attempt++;
-        await sleep(300 * 2 ** (attempt - 1));
-        continue;
-      }
-      throw err;
     }
+  } finally {
+    clearTimeout(id);
   }
 }

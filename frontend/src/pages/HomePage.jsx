@@ -22,7 +22,7 @@ const deals = [
 
   {
     badge: "SUPER DEAL",
-    id: "hp-15",
+    id: "hp-16",
     image: "src/assets/dator.avif",
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
@@ -32,7 +32,7 @@ const deals = [
 
   {
     badge: "SUPER DEAL",
-    id: "hp-15",
+    id: "hp-17",
     image: "src/assets/charger/laddare1.webp",
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
@@ -41,7 +41,7 @@ const deals = [
   },
   {
     badge: "SUPER DEAL",
-    id: "hp-15",
+    id: "hp-18",
     image: "src/assets/tvattmaskin.avif",
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
@@ -50,7 +50,7 @@ const deals = [
   },
   {
     badge: "SUPER DEAL",
-    id: "hp-15",
+    id: "hp-19",
     image: "src/assets/tv.avif",
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
@@ -59,7 +59,7 @@ const deals = [
   },
   {
     badge: "SUPER DEAL",
-    id: "hp-15",
+    id: "hp-20",
     image: "/images/hp15.jpg",
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
@@ -68,7 +68,7 @@ const deals = [
   },
   {
     badge: "SUPER DEAL",
-    id: "hp-15",
+    id: "hp-151",
     image: "/images/hp15.jpg",
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
@@ -77,7 +77,7 @@ const deals = [
   },
   {
     badge: "SUPER DEAL",
-    id: "hp-15",
+    id: "hp-154",
     image: "/images/hp15.jpg",
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
@@ -86,7 +86,7 @@ const deals = [
   },
   {
     badge: "SUPER DEAL",
-    id: "hp-15",
+    id: "hp-155",
     image: "/images/hp15.jpg",
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
@@ -95,7 +95,7 @@ const deals = [
   },
   {
     badge: "SUPER DEAL",
-    id: "hp-15",
+    id: "hp-15123",
     image: "/images/hp15.jpg",
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",

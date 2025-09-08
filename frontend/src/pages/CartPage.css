@@ -1,0 +1,93 @@
+/* src/pages/CartPage.css */
+
+.cart-item {
+  transition: background-color 0.2s ease;
+}
+
+.cart-item:hover {
+  background-color: #f8f9fa;
+}
+
+.quantity-controls {
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.quantity-controls button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  color: #6c757d;
+  transition: background-color 0.2s ease;
+}
+
+.quantity-controls button:hover {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.quantity-controls .quantity-display {
+  border-left: 1px solid #dee2e6;
+  border-right: 1px solid #dee2e6;
+  padding: 0.5rem 1rem;
+  background-color: #fff;
+  min-width: 50px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.order-summary-card {
+  position: sticky;
+  top: 2rem;
+}
+
+.member-benefits {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border: 1px solid #f0c808;
+}
+
+.stock-indicator {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.stock-indicator::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #28a745;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+@media (max-width: 991.98px) {
+  .order-summary-card {
+    position: static;
+    top: auto;
+  }
+  
+  .cart-header-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .cart-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .cart-item .product-info {
+    order: 1;
+  }
+  
+  .cart-item .quantity-controls {
+    order: 2;
+  }
+  
+  .cart-item .price-info {
+    order: 3;
+  }
+}

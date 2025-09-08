@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
+import { getProductById } from '../services/catalog';
 
 const CartContext = createContext(null);
 
@@ -54,14 +55,43 @@ export function CartProvider({ children }) {
     [state.items]
   );
 
+  // Calculate totals with products
+  const totals = useMemo(() => {
+    const cartItems = Object.entries(state.items).map(([id, qty]) => {
+      const product = getProductById(id);
+      return product ? { ...product, qty } : null;
+    }).filter(Boolean);
+
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const vat = Math.round(subtotal * 0.20); // 20% Swedish VAT
+    const total = subtotal;
+
+    return {
+      subtotal,
+      vat,
+      total,
+      itemCount: cartItems.length
+    };
+  }, [state.items]);
+
+  const formatMoney = (amount) => {
+    return new Intl.NumberFormat('sv-SE', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
   const api = useMemo(() => ({
     items: state.items,
     count,
+    ...totals,
+    formatMoney,
     add: (id, qty = 1) => dispatch({ type: 'ADD', payload: { id, qty } }),
     remove: (id) => dispatch({ type: 'REMOVE', payload: { id } }),
     setQty: (id, qty) => dispatch({ type: 'SET_QTY', payload: { id, qty } }),
     clear: () => dispatch({ type: 'CLEAR' }),
-  }), [state.items, count]);
+  }), [state.items, count, totals]);
 
   return <CartContext.Provider value={api}>{children}</CartContext.Provider>;
 }

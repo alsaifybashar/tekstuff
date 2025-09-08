@@ -1,5 +1,5 @@
 .footer-dark {
-  background: #0e1a4a;           /* deep navy like your example */
+  background: #0e1a4a;           
   color: #e9edf7;
 }
 .footer-dark .text-secondary { color: rgba(255,255,255,.6) !important; }

@@ -44,20 +44,17 @@ export default function ProductPage() {
         // 1) Try fetch by "id" (slug may equal id in some datasets)
         let p = null;
         try {
-          p = await api.getProductBySlug(slug);
-        } catch (_) {
-          // ignore (may be 404)
+          p = await api.getProductBySlug(slug); // first try by slug
+        } catch (e) {
+          if (e?.status !== 404) console.error(e);
         }
-
-        // 2) If not found, list products and match by slug field
         if (!p) {
-          const list = await api.listProducts(); // { items, ... }
-          p = list.items?.find((x) => x.slug === slug);
+          const list = await api.listProducts();
+          p = list.items.find((x) => x.slug === slug) || null;
         }
+        if (!p) throw new Error("Produkten hittades inte.");
+        setProduct(p);
 
-        if (!p) {
-          throw new Error("Produkten hittades inte.");
-        }
 
         // Normalize numerics
         p.price = Number(p.price) || 0;

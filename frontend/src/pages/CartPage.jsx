@@ -46,54 +46,18 @@ export default function CartPage() {
   // Load product details for current cart (parallel + dedupe)
   useEffect(() => {
     let cancelled = false;
-
     async function load() {
-      setLoading(true);
-      setErr(null);
+      setLoading(true); setErr(null);
       try {
         const entries = Object.entries(items).filter(([, q]) => (Number(q) || 0) > 0);
-
-        if (!entries.length) {
-          if (!cancelled) setRows([]);
-          return;
-        }
-
-        // Deduplicate product IDs to avoid duplicate fetches
-        const uniqueIds = [...new Set(entries.map(([id]) => id))];
-
-        const results = await Promise.allSettled(
-          uniqueIds.map((id) => api.getProductById(id))
-        );
-
-        // Map id -> product
-        const byId = new Map();
-        results.forEach((res, i) => {
-          const id = uniqueIds[i];
-          if (res.status === "fulfilled" && res.value) {
-            const p = res.value;
-            byId.set(id, {
-              ...p,
-              // Normalize numeric fields to avoid NaN
-              price: Number(p.price) || 0,
-              oldPrice: p.oldPrice != null ? Number(p.oldPrice) : undefined,
-            });
-          } else {
-            console.error("Failed to fetch product", id, res.reason);
-          }
-        });
-
-        // Build rows in the same order as cart entries
-        const next = entries
-          .map(([id, qty]) => {
-            const p = byId.get(id);
-            if (!p) return null;
-            return {
-              ...p,
-              qty: Math.max(0, Math.floor(Number(qty) || 0)),
-            };
-          })
-          .filter(Boolean);
-
+        if (!entries.length) { if (!cancelled) setRows([]); return; }
+        const ids = [...new Set(entries.map(([id]) => id))];
+        const products = await api.getProductsBatch(ids);           // 👈 one backend call
+        const map = new Map(products.map((p) => [p.id, p]));
+        const next = entries.map(([id, qty]) => {
+          const p = map.get(id); if (!p) return null;
+          return { ...p, qty: Math.max(0, Math.floor(Number(qty) || 0)) };
+        }).filter(Boolean);
         if (!cancelled) setRows(next);
       } catch (e) {
         if (!cancelled) setErr(e.message || "Något gick fel vid hämtning.");
@@ -101,10 +65,10 @@ export default function CartPage() {
         if (!cancelled) setLoading(false);
       }
     }
-
     load();
     return () => { cancelled = true; };
   }, [items]);
+
 
   const totals = useMemo(() => {
     const subtotal = rows.reduce(

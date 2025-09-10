@@ -8,12 +8,12 @@ import Col from "react-bootstrap/Col";
 import Footer from "../components/Footer/Footer";
 import { motion } from "framer-motion";
 import TopBanner from "../components/TopBanner"; // Importing TopBanner component
-
+import imgLaddare9 from "../assets/charger/laddare9.webp";
 const deals = [
   {
     badge: "SUPER DEAL",
     id: "hp-15",
-    image: "src/assets/react.svg",
+    image: imgLaddare9,
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
     price: "5490:-",
@@ -23,7 +23,7 @@ const deals = [
   {
     badge: "SUPER DEAL",
     id: "hp-16",
-    image: "src/assets/dator.avif",
+    image: imgLaddare9,
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
     price: "5490:-",
@@ -33,7 +33,7 @@ const deals = [
   {
     badge: "SUPER DEAL",
     id: "hp-17",
-    image: "src/assets/charger/laddare1.webp",
+    image: imgLaddare9,
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
     price: "5490:-",
@@ -42,7 +42,7 @@ const deals = [
   {
     badge: "SUPER DEAL",
     id: "hp-18",
-    image: "src/assets/tvattmaskin.avif",
+    image: imgLaddare9,
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
     price: "5490:-",
@@ -51,7 +51,7 @@ const deals = [
   {
     badge: "SUPER DEAL",
     id: "hp-19",
-    image: "src/assets/tv.avif",
+    image: imgLaddare9,
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
     price: "5490:-",
@@ -60,7 +60,7 @@ const deals = [
   {
     badge: "SUPER DEAL",
     id: "hp-20",
-    image: "/images/hp15.jpg",
+    image: imgLaddare9,
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
     price: "5490:-",
@@ -69,7 +69,7 @@ const deals = [
   {
     badge: "SUPER DEAL",
     id: "hp-151",
-    image: "/images/hp15.jpg",
+    image: imgLaddare9,
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
     price: "5490:-",
@@ -78,7 +78,7 @@ const deals = [
   {
     badge: "SUPER DEAL",
     id: "hp-154",
-    image: "/images/hp15.jpg",
+    image: imgLaddare9,
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
     price: "5490:-",
@@ -87,7 +87,7 @@ const deals = [
   {
     badge: "SUPER DEAL",
     id: "hp-155",
-    image: "/images/hp15.jpg",
+    image: imgLaddare9,
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
     price: "5490:-",
@@ -96,7 +96,7 @@ const deals = [
   {
     badge: "SUPER DEAL",
     id: "hp-15123",
-    image: "/images/hp15.jpg",
+    image: imgLaddare9,
     title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
     subtitle: "Finns i andra varianter",
     price: "5490:-",

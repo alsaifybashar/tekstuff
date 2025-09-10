@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.7",
+    "bootstrap-icons": "^1.13.1",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.539.0",
     "prop-types": "^15.8.1",

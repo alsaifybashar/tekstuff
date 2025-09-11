@@ -18,7 +18,7 @@ import QuantityPicker from "../components/QuantityPicker";
 import ProductCarousel from "../components/ProductCarousel/ProductCarousel";
 
 import { useCart } from "../context/CartContext";
-import { api } from "../services/api";
+import { getProductBySlug, getProductById, getRelatedProducts } from "../services/catalog";
 
 const kr = new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 0 });
 
@@ -30,59 +30,40 @@ export default function ProductPage() {
   const [qty, setQty] = useState(1);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
-
   const [related, setRelated] = useState([]);
 
   useEffect(() => {
-    let cancelled = false;
-
     async function load() {
       setLoading(true);
       setErr(null);
       setProduct(null);
+      
       try {
-        // 1) Try fetch by "id" (slug may equal id in some datasets)
-        let p = null;
-        try {
-          p = await api.getProductBySlug(slug); // first try by slug
-        } catch (e) {
-          if (e?.status !== 404) console.error(e);
-        }
+        // Try to find product by slug first, then by id
+        let p = getProductBySlug(slug) || getProductById(slug);
+        
         if (!p) {
-          const list = await api.listProducts();
-          p = list.items.find((x) => x.slug === slug) || null;
+          throw new Error("Produkten hittades inte.");
         }
-        if (!p) throw new Error("Produkten hittades inte.");
-        setProduct(p);
-
 
         // Normalize numerics
         p.price = Number(p.price) || 0;
         if (p.oldPrice != null) p.oldPrice = Number(p.oldPrice);
 
-        if (!cancelled) {
-          setProduct(p);
-          // Fetch simple related suggestions (same brand or deals)
-          try {
-            const list2 = await api.listProducts();
-            const suggestions = (list2.items || [])
-              .filter((x) => x.id !== p.id)
-              .filter((x) => (x.brand && p.brand ? x.brand === p.brand : x.isDeal || p.isDeal))
-              .slice(0, 12);
-            if (!cancelled) setRelated(suggestions);
-          } catch {
-            /* non-blocking */
-          }
-        }
+        setProduct(p);
+        
+        // Get related products
+        const relatedProducts = getRelatedProducts(p, 8);
+        setRelated(relatedProducts);
+        
       } catch (e) {
-        if (!cancelled) setErr(e.message || "Något gick fel.");
+        setErr(e.message || "Något gick fel.");
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
     }
 
     load();
-    return () => { cancelled = true; };
   }, [slug]);
 
   const addToCart = () => {
@@ -91,12 +72,10 @@ export default function ProductPage() {
   };
 
   const specs = useMemo(() => {
-    // Optional area for simple spec rendering if backend sends attrs later.
-    // Return array of [label, value]
-    const rows = [];
-    if (product?.brand) rows.push(["Märke", product.brand]);
-    if (product?.slug) rows.push(["Artikel", product.slug]);
-    return rows;
+    if (!product?.specs) return [];
+    
+    // Convert specs object to array of [label, value]
+    return Object.entries(product.specs);
   }, [product]);
 
   return (
@@ -178,13 +157,25 @@ export default function ProductPage() {
                 </Col>
               </Row>
 
-              {/* Description block (optional if you add it to backend later) */}
+              {/* Description block */}
               {product.description && (
                 <Row className="g-4 mt-3">
                   <Col md={12}>
                     <div className="border rounded p-3">
                       <h2 className="h6 mb-2">Produktbeskrivning</h2>
                       <p className="mb-0">{product.description}</p>
+                    </div>
+                  </Col>
+                </Row>
+              )}
+
+              {/* Long description */}
+              {product.longDescription && (
+                <Row className="g-4 mt-3">
+                  <Col md={12}>
+                    <div className="border rounded p-3">
+                      <h2 className="h6 mb-2">Detaljerad beskrivning</h2>
+                      <p className="mb-0">{product.longDescription}</p>
                     </div>
                   </Col>
                 </Row>
@@ -211,7 +202,6 @@ export default function ProductPage() {
 
 /**
  * Adapt generic product objects to your ProductCarousel's expected shape.
- * Carousel items typically need: { badge?, id, image, title, subtitle?, price, oldPrice? }
  */
 function toCarouselProducts(items = []) {
   return items.map((p) => ({
@@ -227,5 +217,5 @@ function toCarouselProducts(items = []) {
 
 function toKr(n) {
   const v = Math.round(Number(n) || 0);
-  return String(v); // ProductCarousel in your codebase prints "kr" itself or in parent
+  return `${v} kr`;
 }

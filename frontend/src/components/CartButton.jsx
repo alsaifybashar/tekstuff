@@ -4,18 +4,24 @@ import { useCart } from "../context/CartContext";
 import { useEffect, useState } from "react";
 
 export default function CartButton() {
-  const { count } = useCart();
-  // tiny “bump” animation when count changes
+  // ✅ IMPORTANT: Make sure you destructure 'items' properly from useCart()
+  const { count, items } = useCart(); // ← This line should include 'items'
+  
+  // Add error handling in case cart context fails
+  const safeCount = count || 0;
+  
+  // tiny "bump" animation when count changes
   const [bump, setBump] = useState(false);
+  
   useEffect(() => {
-    if (count >= 0) {
+    if (safeCount >= 0) {
       setBump(true);
       const t = setTimeout(() => setBump(false), 300);
       return () => clearTimeout(t);
     }
-  }, [count]);
+  }, [safeCount]); // ← Use safeCount instead of count
 
-  const label = count > 99 ? "99+" : String(count);
+  const label = safeCount > 99 ? "99+" : String(safeCount);
 
   return (
     <Button
@@ -24,7 +30,7 @@ export default function CartButton() {
       className={`cart-btn-custom d-flex align-items-center gap-2 ${
         bump ? "cart-bump" : ""
       }`}
-      aria-label={`Kundvagn, ${count} artikel${count === 1 ? "" : "er"}`}
+      aria-label={`Kundvagn, ${safeCount} artikel${safeCount === 1 ? "" : "er"}`}
     >
       <CartIcon />
       <span className="d-none d-lg-inline fw-semibold">Kundvagn</span>

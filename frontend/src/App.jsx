@@ -10,7 +10,6 @@ import CartPage from "./pages/CartPage";
 export default function App() {
   return (
     <BrowserRouter>
-
       <CartProvider>
         <Routes>
           <Route path="/" element={<HomePage />} />

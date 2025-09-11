@@ -40,14 +40,14 @@ export function CartProvider({ children }) {
     try {
       const raw = localStorage.getItem('cart_state');
       if (raw) dispatch({ type: 'INIT', payload: JSON.parse(raw) });
-    } catch {}
+    } catch { }
   }, []);
 
   // persist changes
   useEffect(() => {
     try {
       localStorage.setItem('cart_state', JSON.stringify(state));
-    } catch {}
+    } catch { }
   }, [state]);
 
   const count = useMemo(
@@ -82,16 +82,15 @@ export function CartProvider({ children }) {
     }).format(amount);
   };
 
-  const api = useMemo(() => ({
-    items: state.items,
-    count,
-    ...totals,
-    formatMoney,
-    add: (id, qty = 1) => dispatch({ type: 'ADD', payload: { id, qty } }),
-    remove: (id) => dispatch({ type: 'REMOVE', payload: { id } }),
-    setQty: (id, qty) => dispatch({ type: 'SET_QTY', payload: { id, qty } }),
-    clear: () => dispatch({ type: 'CLEAR' }),
-  }), [state.items, count, totals]);
+// In src/context/CartContext.jsx
+const api = useMemo(() => ({
+  items: state.items,  // ← Make sure this line exists
+  count,
+  add: (id, qty = 1) => dispatch({ type: 'ADD', payload: { id, qty } }),
+  remove: (id) => dispatch({ type: 'REMOVE', payload: { id } }),
+  setQty: (id, qty) => dispatch({ type: 'SET_QTY', payload: { id, qty } }),
+  clear: () => dispatch({ type: 'CLEAR' }),
+}), [state.items, count]);
 
   return <CartContext.Provider value={api}>{children}</CartContext.Provider>;
 }

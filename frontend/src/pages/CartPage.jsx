@@ -1,25 +1,22 @@
-// src/pages/CartPage.jsx - COMPLETE REPLACEMENT
+// src/pages/CartPage.jsx - REPLACE ENTIRE FILE
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Minus, Plus, Trash2, Heart } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Trash2, Heart, ShoppingCart } from "lucide-react";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer/Footer";
-import ProductCarousel from "../components/ProductCarousel/ProductCarousel";
 
 import { useCart } from "../context/CartContext";
-import allProducts from "../data/products.js"; // Your existing products
+import allProducts from "../data/products.js";
 import "./CartPage.css";
-
-const kr = new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 0 });
 
 export default function CartPage() {
   const { items, setQty, remove, clear, count } = useCart();
-  const [rows, setRows] = useState([]);
+  const [cartRows, setCartRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
 
-  // Load product details for current cart
+  // Load product details
   useEffect(() => {
     let cancelled = false;
     
@@ -30,37 +27,38 @@ export default function CartPage() {
       try {
         const entries = Object.entries(items).filter(([, q]) => (Number(q) || 0) > 0);
         if (!entries.length) {
-          if (!cancelled) setRows([]);
+          if (!cancelled) setCartRows([]);
           return;
         }
 
         const productRows = entries.map(([productId, qty]) => {
-          // Find product in your data
           let product = allProducts?.find(p => 
             String(p.id) === String(productId) || 
             String(p.slug) === String(productId)
           );
 
           if (!product) {
-            // Fallback product
             product = {
               id: productId,
               title: `Product ${productId}`,
+              subtitle: "Produkt beskrivning",
+              brand: "Unknown",
               price: 299,
               image: "/images/placeholder.png",
-              brand: "Unknown",
-              inStock: true
+              inStock: true,
+              category: "chargers"
             };
           }
 
           return {
             ...product,
             qty: Math.max(0, Math.floor(Number(qty) || 0)),
-            price: Number(product.price) || 0
+            price: Number(product.price) || 0,
+            subtitle: product.subtitle || product.description || "Produktbeskrivning"
           };
         });
 
-        if (!cancelled) setRows(productRows);
+        if (!cancelled) setCartRows(productRows);
         
       } catch (e) {
         if (!cancelled) setErr(e.message || "Något gick fel vid hämtning.");
@@ -73,16 +71,36 @@ export default function CartPage() {
     return () => { cancelled = true; };
   }, [items]);
 
+  // Calculate detailed totals
   const totals = useMemo(() => {
-    const subtotal = rows.reduce(
-      (sum, r) => sum + (Number(r.price) || 0) * (Number(r.qty) || 0),
-      0
-    );
-    const vat = Math.round(subtotal * 0.2); // 20% Swedish VAT
-    return { subtotal, vat };
-  }, [rows]);
+    const totalItems = cartRows.reduce((sum, item) => sum + item.qty, 0);
+    const totalMRP = cartRows.reduce((sum, item) => sum + ((item.oldPrice || item.price) * item.qty), 0);
+    const discountAmount = cartRows.reduce((sum, item) => {
+      const discount = item.oldPrice ? (item.oldPrice - item.price) * item.qty : 0;
+      return sum + discount;
+    }, 0);
+    const subtotal = cartRows.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const deliveryCharges = subtotal > 500 ? 0 : 49;
+    const gst = Math.round(subtotal * 0.18); // 18% GST
+    const total = subtotal + deliveryCharges + gst;
+    
+    return { 
+      totalItems, 
+      totalMRP, 
+      discountAmount, 
+      subtotal, 
+      deliveryCharges, 
+      gst, 
+      total 
+    };
+  }, [cartRows]);
 
-  const fmt = (n) => `${kr.format(Math.round(Number(n) || 0))}:-`;
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('sv-SE', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(price);
+  };
 
   const handleQuantityChange = (productId, newQty) => {
     const qty = Math.max(0, Math.floor(Number(newQty) || 0));
@@ -93,23 +111,18 @@ export default function CartPage() {
     }
   };
 
-  // Empty cart UI
-  if (!rows.length && !loading) {
+  // Empty cart state
+  if (!cartRows.length && !loading) {
     return (
       <div className="d-flex flex-column min-vh-100">
         <Navbar />
         <main className="flex-grow-1">
-          <div className="cart-container">
-            <div className="cart-header">
-              <Link to="/" className="back-button">
-                <ArrowLeft size={20} />
-                Fortsätt handla
-              </Link>
-              <h1>DIN KUNDVAGN (0 PRODUKTER)</h1>
-            </div>
-            <div className="empty-cart">
-              <p>Din kundvagn är tom</p>
-              <Link to="/" className="btn btn-primary">Fortsätt handla</Link>
+          <div className="refined-cart-container">
+            <div className="empty-state">
+              <ShoppingCart size={64} className="empty-icon" />
+              <h2>Din kundvagn är tom</h2>
+              <p>Lägg till några produkter för att komma igång</p>
+              <Link to="/" className="continue-btn">Fortsätt handla</Link>
             </div>
           </div>
         </main>
@@ -122,127 +135,158 @@ export default function CartPage() {
     <div className="d-flex flex-column min-vh-100">
       <Navbar />
       <main className="flex-grow-1">
-        <div className="cart-container">
-          {/* Header */}
-          <div className="cart-header">
-            <Link to="/" className="back-button">
-              <ArrowLeft size={20} />
-              Fortsätt handla
-            </Link>
-            <div className="header-actions">
-              <h1>DIN KUNDVAGN ({count} PRODUKT{count !== 1 ? 'ER' : ''})</h1>
-              <button className="checkout-button-header">
-                Fortsätt till kassan
-              </button>
+        <div className="refined-cart-container">
+          {/* Progress Steps */}
+          <div className="progress-steps">
+            <div className="step active">
+              <div className="step-number">01</div>
+              <span className="step-label">Min kundvagn</span>
+            </div>
+            <div className="step-line"></div>
+            <div className="step">
+              <div className="step-number">02</div>
+              <span className="step-label">Leveransinfo</span>
+            </div>
+            <div className="step-line"></div>
+            <div className="step">
+              <div className="step-number">03</div>
+              <span className="step-label">Betalning</span>
             </div>
           </div>
 
-          {err && (
-            <div className="alert alert-danger mb-3">{err}</div>
-          )}
-
+          {/* Main Content */}
           <div className="cart-content">
-            {/* Cart Items */}
-            <div className="cart-items">
-              {rows.map((item) => (
-                <div key={item.id} className="cart-item">
-                  {/* Product Image */}
-                  <div className="item-image">
-                    <img 
-                      src={item.image || item.images?.[0] || "/images/placeholder.png"} 
-                      alt={item.title || item.name} 
-                    />
-                  </div>
-
-                  {/* Product Info */}
-                  <div className="item-info">
-                    <h3 className="item-title">{item.title || item.name}</h3>
-                    <div className="item-status">
-                      <span className="status-dot"></span>
-                      <span className="status-text">I lager</span>
-                    </div>
-                  </div>
-
-                  {/* Quantity Controls */}
-                  <div className="quantity-controls">
-                    <button 
-                      className="qty-button"
-                      onClick={() => handleQuantityChange(item.id, item.qty - 1)}
-                      aria-label="Minska antal"
-                    >
-                      <Minus size={16} />
-                    </button>
-                    <span className="qty-display">{item.qty}</span>
-                    <button 
-                      className="qty-button"
-                      onClick={() => handleQuantityChange(item.id, item.qty + 1)}
-                      aria-label="Öka antal"
-                    >
-                      <Plus size={16} />
-                    </button>
-                  </div>
-
-                  {/* Price */}
-                  <div className="item-price">
-                    {fmt(item.price)}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="item-actions">
-                    <button className="action-button wishlist-button">
-                      <Heart size={16} />
-                    </button>
-                    <button 
-                      className="action-button remove-button"
-                      onClick={() => remove(item.id)}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Order Summary Sidebar */}
-            <div className="order-summary">
-              {/* Member Benefits */}
-              <div className="member-benefits">
-                <h3>FÅ MER SOM MEDLEM</h3>
-                <ul>
-                  <li>Exklusiva klubbdeals & rabatter</li>
-                  <li>100 kr presentkort för köp över 5000 kr</li>
-                  <li>Förtur till kampanjer & Black Friday</li>
-                </ul>
-                <button className="login-button">
-                  Logga in / Registrera dig
-                </button>
+            {/* Left Column - Cart Items */}
+            <div className="cart-section">
+              <div className="section-header">
+                <h1>01. Min kundvagn</h1>
+                <div className="item-count">{count} artikel{count !== 1 ? 'er' : ''}</div>
               </div>
 
-              {/* Order Overview */}
-              <div className="order-overview">
-                <div className="overview-tabs">
-                  <button className="tab active">Orderöversikt</button>
-                  <button className="tab">Delbetalning</button>
+              {err && (
+                <div className="error-message">
+                  <p>{err}</p>
                 </div>
+              )}
 
-                <div className="summary-line">
-                  <span>Leveransmetod</span>
-                  <span>Pris visas i kassan</span>
+              <div className="cart-items">
+                {cartRows.map((item) => (
+                  <div key={item.id} className="cart-item">
+                    <div className="item-image">
+                      <img 
+                        src={item.image || item.images?.[0] || "/images/placeholder.png"} 
+                        alt={item.title || item.name}
+                        onError={(e) => {
+                          e.target.src = "/images/placeholder.png";
+                        }}
+                      />
+                    </div>
+                    
+                    <div className="item-details">
+                      <h3 className="item-title">{item.title || item.name}</h3>
+                      <p className="item-subtitle">{item.subtitle}</p>
+                      
+                      <div className="item-controls">
+                        <div className="quantity-wrapper">
+                          <label>Quantity</label>
+                          <div className="quantity-controls">
+                            <button 
+                              className="qty-btn"
+                              onClick={() => handleQuantityChange(item.id, item.qty - 1)}
+                              disabled={loading}
+                            >
+                              <Minus size={16} />
+                            </button>
+                            <span className="qty-display">{item.qty.toString().padStart(2, '0')}</span>
+                            <button 
+                              className="qty-btn"
+                              onClick={() => handleQuantityChange(item.id, item.qty + 1)}
+                              disabled={loading}
+                            >
+                              <Plus size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="item-price">
+                      <span className="price-amount">{formatPrice(item.price * item.qty)} kr</span>
+                      {item.oldPrice && (
+                        <span className="original-price">{formatPrice(item.oldPrice * item.qty)} kr</span>
+                      )}
+                    </div>
+
+                    <div className="item-actions">
+                      <button className="action-btn wishlist-btn">
+                        <Heart size={18} />
+                      </button>
+                      <button 
+                        className="action-btn remove-btn"
+                        onClick={() => remove(item.id)}
+                        disabled={loading}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Column - Price Details */}
+            <div className="price-section">
+              <h2 className="price-title">Prisdetaljer</h2>
+              
+              <div className="price-breakdown">
+                <div className="price-row">
+                  <span>Totalt antal artiklar</span>
+                  <span>{totals.totalItems}</span>
                 </div>
-
-                <div className="summary-line">
+                
+                <div className="price-row">
+                  <span>Totalt MRP-värde</span>
+                  <span>{formatPrice(totals.totalMRP)} kr</span>
+                </div>
+                
+                {totals.discountAmount > 0 && (
+                  <div className="price-row discount">
+                    <span>Rabatt på MRP</span>
+                    <span className="discount-amount">{formatPrice(totals.discountAmount)} kr</span>
+                  </div>
+                )}
+                
+                <div className="price-row">
+                  <span>Delsumma</span>
+                  <span>{formatPrice(totals.subtotal)} kr</span>
+                </div>
+                
+                <div className="price-row">
+                  <span>Leveransavgifter</span>
+                  <span className={totals.deliveryCharges === 0 ? 'free-delivery' : ''}>
+                    {totals.deliveryCharges === 0 ? 'GRATIS' : `${formatPrice(totals.deliveryCharges)} kr`}
+                  </span>
+                </div>
+                
+                <div className="price-row">
                   <span>Moms</span>
-                  <span>{fmt(totals.vat)}</span>
+                  <span>{formatPrice(totals.gst)} kr</span>
                 </div>
-
-                <div className="total-line">
-                  <span className="total-label">Totalbelopp SEK</span>
-                  <span className="total-amount">{fmt(totals.subtotal)}</span>
+                
+                <div className="price-row total">
+                  <span>Totalsumma</span>
+                  <span>{formatPrice(totals.total)} kr</span>
                 </div>
+              </div>
 
-                <button className="checkout-button">
-                  Fortsätt till kassan
-                </button>
+              <button className="checkout-btn">
+                Fortsätt till leverans
+              </button>
+
+              <div className="savings-note">
+                {totals.discountAmount > 0 && (
+                  <p>Du sparar {formatPrice(totals.discountAmount)} kr på denna beställning!</p>
+                )}
               </div>
             </div>
           </div>

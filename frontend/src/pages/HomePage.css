@@ -1,0 +1,89 @@
+.refined-homepage {
+  background: #ffffff;
+  min-height: 100vh;
+}
+
+/* Product Carousel specific styles for homepage */
+.refined-homepage .product-carousel {
+  padding: 3rem 2rem;
+  background: #ffffff;
+}
+
+.refined-homepage .product-carousel:nth-child(even) {
+  background: #f8f9fa;
+}
+
+.refined-homepage .product-carousel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.refined-homepage .product-carousel-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+.refined-homepage .product-carousel-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.refined-homepage .product-carousel-container {
+  position: relative;
+}
+
+.refined-homepage .product-carousel-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.refined-homepage .product-carousel-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.refined-homepage .product-carousel-slide {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+}
+
+/* Section spacing */
+.refined-homepage > section {
+  margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .refined-homepage .product-carousel-slide {
+    flex: 0 0 260px;
+  }
+}
+
+@media (max-width: 768px) {
+  .refined-homepage .product-carousel {
+    padding: 2rem 1rem;
+  }
+  
+  .refined-homepage .product-carousel-title {
+    font-size: 1.5rem;
+  }
+  
+  .refined-homepage .product-carousel-slide {
+    flex: 0 0 240px;
+  }
+}
+
+@media (max-width: 480px) {
+  .refined-homepage .product-carousel-slide {
+    flex: 0 0 200px;
+  }
+}

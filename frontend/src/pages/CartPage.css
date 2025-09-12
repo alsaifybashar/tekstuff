@@ -555,3 +555,27 @@
     gap: 0.75rem;
   }
 }
+
+
+
+/* src/CartPage.css */
+/* Optional: remove colors here if fully controlled by theme.css */
+.cart-page {
+  background: var(--brand-bg);
+  color: var(--brand-text);
+}
+.cart-summary, .cart-item {
+  background: var(--brand-surface);
+  border: 1px solid var(--brand-border);
+}
+.cart-total {
+  color: var(--brand-text);
+}
+.cart-checkout-btn {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: #051019;
+}
+.cart-checkout-btn:hover {
+  background: var(--brand-primary-600);
+}

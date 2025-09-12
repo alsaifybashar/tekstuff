@@ -15,7 +15,7 @@ import Footer from "../components/Footer/Footer";
 import ProductImageGallery from "../components/ProductImageGallery";
 import PriceBlock from "../components/PriceBlock";
 import QuantityPicker from "../components/QuantityPicker";
-import ProductCarousel from "../components/ProductCarousel/ProductCarousel";
+import ProductCarousel from "../components/Product/ProductCarousel/ProductCarousel";
 
 import { useCart } from "../context/CartContext";
 import { getProductBySlug, getProductById, getRelatedProducts } from "../services/catalog";
@@ -37,11 +37,11 @@ export default function ProductPage() {
       setLoading(true);
       setErr(null);
       setProduct(null);
-      
+
       try {
         // Try to find product by slug first, then by id
         let p = getProductBySlug(slug) || getProductById(slug);
-        
+
         if (!p) {
           throw new Error("Produkten hittades inte.");
         }
@@ -51,11 +51,11 @@ export default function ProductPage() {
         if (p.oldPrice != null) p.oldPrice = Number(p.oldPrice);
 
         setProduct(p);
-        
+
         // Get related products
         const relatedProducts = getRelatedProducts(p, 8);
         setRelated(relatedProducts);
-        
+
       } catch (e) {
         setErr(e.message || "Något gick fel.");
       } finally {
@@ -73,7 +73,7 @@ export default function ProductPage() {
 
   const specs = useMemo(() => {
     if (!product?.specs) return [];
-    
+
     // Convert specs object to array of [label, value]
     return Object.entries(product.specs);
   }, [product]);
@@ -194,7 +194,6 @@ export default function ProductPage() {
           )}
         </Container>
       </main>
-
       <Footer />
     </div>
   );

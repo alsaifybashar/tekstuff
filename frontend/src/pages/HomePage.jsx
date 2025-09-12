@@ -1,157 +1,129 @@
-import Navbar from "../components/Navbar";
-import CategoryStrip from "../components/CategoryStrip";
-import ControlledCarousel from "../components/Carousel";
-import Container from "react-bootstrap/Container";
-import ProductCarousel from "../components/ProductCarousel/ProductCarousel";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Footer from "../components/Footer/Footer";
-import { motion } from "framer-motion";
-import TopBanner from "../components/TopBanner"; // Importing TopBanner component
-import imgLaddare9 from "../assets/charger/laddare9.webp";
-const deals = [
-  {
-    badge: "SUPER DEAL",
-    id: "hp-15",
-    image: imgLaddare9,
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
-    subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
-  },
+import React from 'react';
+import { ShoppingCart } from 'lucide-react';
 
-  {
-    badge: "SUPER DEAL",
-    id: "hp-16",
-    image: imgLaddare9,
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
-    subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
-  },
+// Layout Components
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer/Footer';
+import CategoryStrip from '../components/CategoryStrip';
 
-  {
-    badge: "SUPER DEAL",
-    id: "hp-17",
-    image: imgLaddare9,
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
-    subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
-  },
-  {
-    badge: "SUPER DEAL",
-    id: "hp-18",
-    image: imgLaddare9,
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
-    subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
-  },
-  {
-    badge: "SUPER DEAL",
-    id: "hp-19",
-    image: imgLaddare9,
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
-    subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
-  },
-  {
-    badge: "SUPER DEAL",
-    id: "hp-20",
-    image: imgLaddare9,
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
-    subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
-  },
-  {
-    badge: "SUPER DEAL",
-    id: "hp-151",
-    image: imgLaddare9,
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
-    subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
-  },
-  {
-    badge: "SUPER DEAL",
-    id: "hp-154",
-    image: imgLaddare9,
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
-    subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
-  },
-  {
-    badge: "SUPER DEAL",
-    id: "hp-155",
-    image: imgLaddare9,
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
-    subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
-  },
-  {
-    badge: "SUPER DEAL",
-    id: "hp-15123",
-    image: imgLaddare9,
-    title: "HP Laptop 15-fc0828no R5-7520U/16/512 15.6”",
-    subtitle: "Finns i andra varianter",
-    price: "5490:-",
-    oldPrice: "9995:-",
-  },
-];
+// Reusable Components
+import Hero from '../components/Layout/Hero/Hero';
+import ProductCarousel from '../components/Product/ProductCarousel/ProductCarousel';
+import Newsletter from '../components/Form/Newsletter/Newsletter';
+import Section from '../components/Layout/Section/Section';
 
-function HomePage() {
+// Context and Data
+import { useCart } from '../context/CartContext';
+import allProducts from '../data/products.js';
+
+import './HomePage.css';
+
+export default function HomePage() {
+  const { add } = useCart();
+
+  // Process your existing products
+  const featuredDeals = allProducts?.filter(p => p.isDeal || p.oldPrice) || [];
+  const popularProducts = allProducts?.filter(p => !p.isDeal) || [];
+
+  // Event handlers
+  const handleAddToCart = (product) => {
+    if (product.id && product.inStock) {
+      add(product.id, 1);
+    }
+  };
+
+  const handleWishlist = (product, isAdded) => {
+    console.log('Wishlist:', product.id, isAdded);
+  };
+
+  const handleQuickView = (product) => {
+    console.log('Quick view:', product.id);
+  };
+
+  const handleExploreProducts = () => {
+    console.log('Navigate to products');
+  };
+
+  const handleViewOffers = () => {
+    console.log('Navigate to offers');
+  };
+
+  const handleNewsletterSignup = (email) => {
+    console.log('Newsletter signup:', email);
+  };
+
   return (
-    <>
-      <TopBanner
-        message="Missa inte våra Flash Deals!"
-        href="/flash-deals"
-        linkLabel="Klicka här"
-        endsAtISO="2025-09-10T21:00:00Z"
-        colorClass="bg-primary"
-      />
+    <div className="d-flex flex-column min-vh-100">
       <Navbar />
+      
+      <main className="flex-grow-1">
+        <div className="refined-homepage">
+          {/* Category Strip */}
+          <CategoryStrip onSelect={(id) => console.log("Selected:", id)} />
 
+          {/* Hero Section */}
+          <Hero
+            title={
+              <>
+                Premium elektronik för
+                <span className="hero-highlight"> moderna livet</span>
+              </>
+            }
+            description="Upptäck vårt noggrant utvalda sortiment av laddare, kablar och tillbehör från världens mest förtrodda märken."
+            primaryCTA={{
+              text: "Utforska produkter",
+              icon: <ShoppingCart size={18} />,
+              onClick: handleExploreProducts
+            }}
+            secondaryCTA={{
+              text: "Se erbjudanden",
+              onClick: handleViewOffers
+            }}
+            image={{
+              src: "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=600&h=400&fit=crop",
+              alt: "Premium elektronik"
+            }}
+          />
 
-      {/* page spacing */}
-      <div style={{ height: "2rem" }} />
+      
 
-      <CategoryStrip onSelect={(id) => console.log("Selected:", id)} />
+          {/* Featured Deals */}
+          {featuredDeals.length > 0 && (
+            <Section>
+              <ProductCarousel
+                title="Super Deals"
+                products={featuredDeals}
+                featured={true}
+                onAddToCart={handleAddToCart}
+                onWishlist={handleWishlist}
+                onQuickView={handleQuickView}
+              />
+            </Section>
+          )}
 
-      <Container className="py-3">
-        <Row className="justify-content-center">
-          <Col xs={40} md={40} lg={40} xl={40}>
-            <div className="shadow rounded-4 overflow-hidden">
-              <ControlledCarousel />
-            </div>
-          </Col>
-        </Row>
-      </Container>
+          {/* Popular Products */}
+          {popularProducts.length > 0 && (
+            <Section>
+              <ProductCarousel
+                title="Populära produkter"
+                products={popularProducts}
+                onAddToCart={handleAddToCart}
+                onWishlist={handleWishlist}
+                onQuickView={handleQuickView}
+              />
+            </Section>
+          )}
 
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <ProductCarousel title="Super Deals" products={deals} />
-      </motion.div>
-
-      <br></br>
-      <hr class="w-25 mx-auto my-4"></hr>
-      <ProductCarousel title="Nyheter" products={deals} />
-
-      <br></br>
-      <hr class="w-25 mx-auto my-4"></hr>
-      <ProductCarousel title="Populära produkter" products={deals} />
+          {/* Newsletter */}
+          <Newsletter
+            title="Håll dig uppdaterad"
+            description="Få de senaste erbjudandena och produktnyheterna direkt i din inkorg"
+            onSignup={handleNewsletterSignup}
+          />
+        </div>
+      </main>
 
       <Footer />
-    </>
+    </div>
   );
 }
-
-export default HomePage;

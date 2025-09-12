@@ -1,0 +1,161 @@
+/* Buttons — CartPage-matched theme
+-------------------------------------------------- */
+
+:root{
+  /* fallbacks (works even if you didn't add tokens.css yet) */
+  --color-primary:#0d6efd;
+  --color-primary-600:#0b5ed7;
+  --color-primary-50:#e7f1ff;
+
+  --color-surface:#ffffff;
+  --color-border:#e5e7eb;
+  --color-text:#1f2937;
+  --color-muted:#6b7280;
+
+  --radius-md:10px;
+  --shadow-sm:0 2px 8px rgba(16,24,40,.08);
+  --focus-ring:0 0 0 4px rgba(13,110,253,.18);
+}
+
+.btn {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:transform .12s ease, box-shadow .12s ease, background-color .12s ease, border-color .12s ease, color .12s ease;
+  text-decoration:none;
+  white-space:nowrap;
+  position:relative;
+  overflow:hidden;
+
+  border:1px solid transparent;
+  border-radius:var(--radius-md);
+  box-shadow:var(--shadow-sm);
+}
+
+/* Sizes */
+.btn-small  { padding:.5rem 1rem;   font-size:.875rem; line-height:1.2; }
+.btn-medium { padding:.75rem 1.25rem; font-size:1rem; line-height:1.2; }
+.btn-large  { padding:1rem 1.75rem; font-size:1.125rem; line-height:1.2; }
+
+/* Primary (matches CartPage CTAs) */
+.btn-primary{
+  background:var(--color-primary);
+  color:#fff;
+  border-color:var(--color-primary);
+}
+.btn-primary:hover:not(:disabled){
+  background:var(--color-primary-600);
+  border-color:var(--color-primary-600);
+  transform:translateY(-1px);
+}
+.btn-primary:active:not(:disabled){
+  transform:translateY(0);
+}
+.btn-primary:focus-visible{
+  outline:none; box-shadow:var(--focus-ring);
+}
+
+/* Secondary (neutral/gray) */
+.btn-secondary{
+  background:#6366f1; /* you can switch to neutral if desired */
+  background:#475569; /* slate-600 */
+  color:#fff;
+  border-color:#475569;
+}
+.btn-secondary:hover:not(:disabled){
+  background:#334155; border-color:#334155; transform:translateY(-1px);
+}
+.btn-secondary:focus-visible{ outline:none; box-shadow:var(--focus-ring); }
+
+/* Outline (neutral outline, Cart-like hover tint) */
+.btn-outline{
+  background:transparent;
+  color:var(--color-text);
+  border-color:var(--color-border);
+  box-shadow:none; /* outlines feel lighter */
+}
+.btn-outline:hover:not(:disabled){
+  background:var(--color-primary-50);
+  border-color:var(--color-primary);
+  color:var(--color-text);
+  transform:translateY(-1px);
+}
+.btn-outline:focus-visible{ outline:none; box-shadow:var(--focus-ring); }
+
+/* Danger (remove purple gradient, keep simple solid) */
+.btn-danger{
+  background:#dc3545; color:#fff; border-color:#dc3545;
+}
+.btn-danger:hover:not(:disabled){
+  background:#c82333; border-color:#c82333; transform:translateY(-1px);
+}
+.btn-danger:focus-visible{ outline:none; box-shadow:0 0 0 4px rgba(220,53,69,.18); }
+
+/* Success (for confirmations) */
+.btn-success{
+  background:#22c55e; color:#fff; border-color:#22c55e;
+}
+.btn-success:hover:not(:disabled){
+  background:#16a34a; border-color:#16a34a; transform:translateY(-1px);
+}
+.btn-success:focus-visible{ outline:none; box-shadow:0 0 0 4px rgba(34,197,94,.18); }
+
+/* Subtle / light (optional soft button used on white cards) */
+.btn-soft{
+  background:var(--color-primary-50);
+  color:var(--color-primary);
+  border-color:var(--color-primary-50);
+  box-shadow:none;
+}
+.btn-soft:hover:not(:disabled){
+  background:#d9e8ff; border-color:#d9e8ff; transform:translateY(-1px);
+}
+.btn-soft:focus-visible{ outline:none; box-shadow:var(--focus-ring); }
+
+/* States */
+.btn:disabled{
+  opacity:.6; cursor:not-allowed; transform:none !important;
+}
+.btn-full-width{ width:100%; }
+
+/* Loading */
+.btn-loading{ color:transparent; }
+.btn-spinner{
+  display:flex; align-items:center; gap:.5rem;
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+}
+.spinner{
+  width:16px; height:16px;
+  border:2px solid rgba(255,255,255,.35); /* default for solid buttons */
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .6s linear infinite;
+}
+/* spinner color for outline/soft variants on light bg */
+.btn-outline .spinner, .btn-soft .spinner{
+  border-color: rgba(13,110,253,.25);
+  border-top-color: var(--color-primary);
+}
+
+@keyframes spin{ to{ transform:rotate(360deg);} }
+
+/* Icons */
+.btn-icon{ display:inline-flex; align-items:center; }
+.btn-icon-left{ margin-right:.25rem; }
+.btn-icon-right{ margin-left:.25rem; }
+
+/* Ripple — tuned to match blue/neutral surfaces */
+.btn::after{
+  content:''; position:absolute; top:50%; left:50%;
+  width:0; height:0; border-radius:50%;
+  background:rgba(255,255,255,.25);
+  transform:translate(-50%, -50%);
+  transition:width .45s, height .45s;
+}
+.btn-outline::after, .btn-soft::after{
+  background:rgba(13,110,253,.15);
+}
+.btn:active::after{ width:300px; height:300px; }

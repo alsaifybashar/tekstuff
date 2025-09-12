@@ -1,0 +1,152 @@
+/* HERO — CartPage-matched theme
+   - Light page bg
+   - White "card" surface with soft border/shadow
+   - Primary blue accents (like CartPage)
+*/
+
+:root{
+  /* fallbacks if global tokens aren't present */
+  --color-primary: #0d6efd;
+  --color-primary-600: #0b5ed7;
+  --color-primary-50: #e7f1ff;
+
+  --color-bg: #f5f7fb;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+  --color-text: #1f2937;
+
+  --radius-lg: 14px;
+  --radius-md: 10px;
+  --shadow-sm: 0 2px 8px rgba(16,24,40,.08);
+  --shadow-md: 0 8px 24px rgba(16,24,40,.10);
+  --focus-ring: 0 0 0 4px rgba(13,110,253,.18);
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  /* Replace purple gradient with the same subtle light bg as Cart */
+  background: var(--color-bg);
+  padding: 4rem 2rem;
+  margin-bottom: 3rem;
+}
+
+/* Make the hero content look like a CartPage card */
+.hero-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 2.5rem;
+}
+
+.hero-text {
+  color: var(--color-text);
+}
+
+.hero-subtitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+  color: var(--color-primary);
+  opacity: 1;
+}
+
+.hero-title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0 0 1.25rem 0;
+  letter-spacing: -0.025em;
+  color: var(--color-text);
+}
+
+/* Blue highlight to match brand, not yellow */
+.hero-highlight {
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-600) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-description {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  margin: 0 0 2rem 0;
+  opacity: 0.95;
+  max-width: 520px;
+  color: var(--color-text);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Image styling stays modern but with softer, Cart-like shadow */
+.hero-image {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-image img {
+  width: 100%;
+  height: auto;
+  max-width: 520px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Subtle radial decoration using primary tint instead of white glare */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 80%;
+  height: 180%;
+  background:
+    radial-gradient(closest-side, var(--color-primary-50) 0%, transparent 70%);
+  filter: blur(0.5px);
+  animation: rotate 30s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .hero { padding: 3rem 1rem; }
+
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  .hero-description { max-width: 100%; }
+  .hero-actions { justify-content: center; }
+  .hero-image { order: -1; }
+  .hero-image img { max-width: 340px; }
+}

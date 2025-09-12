@@ -1,0 +1,45 @@
+.custom-section {
+  width: 100%;
+}
+
+.custom-section-white {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+}
+
+.custom-section-transparent {
+  background: transparent;
+}
+
+.custom-section-normal {
+  padding: 2rem;
+  margin-bottom: 3rem;
+}
+
+.custom-section-large {
+  padding: 4rem 2rem;
+  margin-bottom: 3rem;
+}
+
+.custom-section-small {
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
+
+.custom-section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .custom-section-normal {
+    padding: 1rem;
+    margin: 0 1rem 2rem 1rem;
+  }
+  
+  .custom-section-large {
+    padding: 2rem 1rem;
+    margin: 0 1rem 2rem 1rem;
+  }
+}

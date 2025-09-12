@@ -1,102 +1,97 @@
-import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
-import { getProductById } from '../services/catalog';
+import React, { createContext, useContext, useEffect, useMemo, useReducer } from "react";
 
-const CartContext = createContext(null);
+const CartCtx = createContext(null);
 
-function cartReducer(state, action) {
+const initial = { items: [] };
+
+function reducer(state, action) {
   switch (action.type) {
-    case 'INIT':
+    case "HYDRATE":
       return action.payload || state;
-    case 'ADD': {
-      const id = action.payload.id;
-      const qty = action.payload.qty ?? 1;
-      const items = { ...state.items, [id]: (state.items[id] || 0) + qty };
-      return { items };
+
+    case "ADD_ITEM": {
+      const { product, qty = 1 } = action.payload || {};
+      if (!product || !product.id) return state; // requires stable id
+      const idx = state.items.findIndex((i) => i.id === product.id);
+      let items;
+      if (idx >= 0) {
+        items = state.items.map((i, n) =>
+          n === idx ? { ...i, qty: Math.min(i.qty + qty, 99) } : i
+        );
+      } else {
+        // keep only fields you need in cart
+        const { id, name, title, price, image, images } = product;
+        items = [
+          ...state.items,
+          {
+            id,
+            name: name || title || "Produkt",
+            price: Number(price) || 0,
+            image: image || images?.[0],
+            qty: Math.max(1, qty),
+          },
+        ];
+      }
+      return { ...state, items };
     }
-    case 'REMOVE': {
-      const id = action.payload.id;
-      const items = { ...state.items };
-      delete items[id];
-      return { items };
+
+    case "REMOVE_ITEM":
+      return { ...state, items: state.items.filter((i) => i.id !== action.payload) };
+
+    case "SET_QTY": {
+      const { id, qty } = action.payload || {};
+      return {
+        ...state,
+        items: state.items.map((i) =>
+          i.id === id ? { ...i, qty: Math.max(1, Math.min(99, Number(qty) || 1)) } : i
+        ),
+      };
     }
-    case 'SET_QTY': {
-      const { id, qty } = action.payload;
-      const items = { ...state.items };
-      if (qty <= 0) delete items[id]; else items[id] = qty;
-      return { items };
-    }
-    case 'CLEAR':
-      return { items: {} };
+
+    case "CLEAR":
+      return { ...state, items: [] };
+
     default:
       return state;
   }
 }
 
 export function CartProvider({ children }) {
-  const [state, dispatch] = useReducer(cartReducer, { items: {} });
+  const [state, dispatch] = useReducer(reducer, initial);
 
-  // read from localStorage once
+  // hydrate from localStorage
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('cart_state');
-      if (raw) dispatch({ type: 'INIT', payload: JSON.parse(raw) });
-    } catch { }
+      const raw = localStorage.getItem("cart:v1");
+      if (raw) dispatch({ type: "HYDRATE", payload: JSON.parse(raw) });
+    } catch {}
   }, []);
 
-  // persist changes
+  // persist to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('cart_state', JSON.stringify(state));
-    } catch { }
+      localStorage.setItem("cart:v1", JSON.stringify(state));
+    } catch {}
   }, [state]);
 
-  const count = useMemo(
-    () => Object.values(state.items).reduce((a, b) => a + b, 0),
-    [state.items]
+  const api = useMemo(
+    () => ({
+      items: state.items,
+      count: state.items.reduce((s, i) => s + i.qty, 0),
+      subtotal: state.items.reduce((s, i) => s + i.qty * (Number(i.price) || 0), 0),
+      addItem: (product, qty = 1) => dispatch({ type: "ADD_ITEM", payload: { product, qty } }),
+      removeItem: (id) => dispatch({ type: "REMOVE_ITEM", payload: id }),
+      setQty: (id, qty) => dispatch({ type: "SET_QTY", payload: { id, qty } }),
+      clear: () => dispatch({ type: "CLEAR" }),
+    }),
+    [state]
   );
 
-  // Calculate totals with products
-  const totals = useMemo(() => {
-    const cartItems = Object.entries(state.items).map(([id, qty]) => {
-      const product = getProductById(id);
-      return product ? { ...product, qty } : null;
-    }).filter(Boolean);
-
-    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    const vat = Math.round(subtotal * 0.20); // 20% Swedish VAT
-    const total = subtotal;
-
-    return {
-      subtotal,
-      vat,
-      total,
-      itemCount: cartItems.length
-    };
-  }, [state.items]);
-
-  const formatMoney = (amount) => {
-    return new Intl.NumberFormat('sv-SE', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
-
-// In src/context/CartContext.jsx
-const api = useMemo(() => ({
-  items: state.items,  // ← Make sure this line exists
-  count,
-  add: (id, qty = 1) => dispatch({ type: 'ADD', payload: { id, qty } }),
-  remove: (id) => dispatch({ type: 'REMOVE', payload: { id } }),
-  setQty: (id, qty) => dispatch({ type: 'SET_QTY', payload: { id, qty } }),
-  clear: () => dispatch({ type: 'CLEAR' }),
-}), [state.items, count]);
-
-  return <CartContext.Provider value={api}>{children}</CartContext.Provider>;
+  return <CartCtx.Provider value={api}>{children}</CartCtx.Provider>;
 }
 
 export function useCart() {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error('useCart must be used within CartProvider');
+  const ctx = useContext(CartCtx);
+  if (!ctx) throw new Error("useCart must be used inside <CartProvider>");
   return ctx;
 }

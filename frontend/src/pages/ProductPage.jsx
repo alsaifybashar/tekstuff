@@ -20,6 +20,9 @@ import ProductCarousel from "../components/Product/ProductCarousel/ProductCarous
 import { useCart } from "../context/CartContext";
 import { getProductBySlug, getProductById, getRelatedProducts } from "../services/catalog";
 
+import Section from '../components/Layout/Section/Section';
+import allProducts from '../data/products.js';
+
 const kr = new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 0 });
 
 export default function ProductPage() {
@@ -31,6 +34,15 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
   const [related, setRelated] = useState([]);
+
+  // Get popular products for carousel
+  const popularProducts = allProducts?.filter(p => !p.isDeal).slice(0, 8) || [];
+  
+  const handleAddToCart = (product) => {
+    if (product.id && product.inStock) {
+      add(product.id, 1);
+    }
+  };
 
   useEffect(() => {
     async function load() {
@@ -180,41 +192,25 @@ export default function ProductPage() {
                   </Col>
                 </Row>
               )}
-
-              {/* Related / Similar products */}
-              <Row className="mt-4">
-                <Col>
-                  <ProductCarousel
-                    title="Liknande produkter"
-                    products={toCarouselProducts(related)}
-                  />
-                </Col>
-              </Row>
             </>
           )}
         </Container>
+
+        {/* Related Products - Fixed to show horizontally */}
+        {popularProducts.length > 0 && (
+          <div style={{ background: '#f8f9fa', marginTop: '3rem' }}>
+            <Container fluid="xl">
+              <ProductCarousel
+                title="Populära produkter"
+                products={popularProducts}
+                onAddToCart={handleAddToCart}
+              />
+            </Container>
+          </div>
+        )}
       </main>
+      
       <Footer />
     </div>
   );
-}
-
-/**
- * Adapt generic product objects to your ProductCarousel's expected shape.
- */
-function toCarouselProducts(items = []) {
-  return items.map((p) => ({
-    badge: p.isDeal ? "SUPER DEAL" : undefined,
-    id: p.id,
-    image: p.image || p.images?.[0],
-    title: p.title || p.name || "Produkt",
-    subtitle: p.brand || "",
-    price: toKr(p.price),
-    oldPrice: p.oldPrice != null ? toKr(p.oldPrice) : undefined,
-  }));
-}
-
-function toKr(n) {
-  const v = Math.round(Number(n) || 0);
-  return `${v} kr`;
 }

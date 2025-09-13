@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import ProductCard from '../ProductCard/ProductCard';
-import Button from '../../UI/Button/Button';
 import { useCart } from '../../../context/CartContext';
 import './ProductCarousel.css';
 
@@ -10,13 +10,11 @@ const ProductCarousel = ({
   products = [],
   featured = false,
   onAddToCart,   // optional
-  onWishlist,
-  onQuickView,
   className = ''
 }) => {
   const scrollRef = useRef(null);
   const cart = useCart();
-  const add = (p) => (onAddToCart ? onAddToCart(p) : cart.addItem(p, 1));
+  const navigate = useNavigate();
 
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
@@ -24,29 +22,72 @@ const ProductCarousel = ({
   const updateButtons = () => {
     const el = scrollRef.current;
     if (!el) return;
-    setCanLeft(el.scrollLeft > 0);
-    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
+    
+    const scrollLeft = el.scrollLeft;
+    const scrollWidth = el.scrollWidth;
+    const clientWidth = el.clientWidth;
+    
+    setCanLeft(scrollLeft > 5); // Small threshold for better UX
+    setCanRight(scrollLeft < scrollWidth - clientWidth - 5);
   };
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
+    
+    // Initial check
     updateButtons();
+    
     const onScroll = () => updateButtons();
+    const onResize = () => updateButtons();
+    
     el.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', updateButtons);
+    window.addEventListener('resize', onResize);
+    
     return () => {
       el.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', updateButtons);
+      window.removeEventListener('resize', onResize);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [products.length]);
 
-  const scroll = (dir) => {
+  const scroll = (direction) => {
     const el = scrollRef.current;
     if (!el) return;
-    const amount = Math.max(280, el.clientWidth * 0.8);
-    el.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' });
+    
+    const cardWidth = 280; // Average card width
+    const visibleCards = Math.floor(el.clientWidth / cardWidth);
+    const scrollAmount = cardWidth * Math.max(1, visibleCards - 1);
+    
+    el.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth'
+    });
+  };
+
+  // Handle product click to navigate to product page
+  const handleProductClick = (product, event) => {
+    // Don't navigate if the click target is a button or inside a button
+    if (event.target.closest('button') || event.target.closest('.btn')) {
+      return;
+    }
+    
+    if (product.slug) {
+      navigate(`/p/${product.slug}`);
+    } else if (product.id) {
+      navigate(`/p/${product.id}`);
+    }
+  };
+
+  // Handle add to cart - this function will be passed to ProductCard
+  const handleAddToCart = (product) => {
+    if (onAddToCart) {
+      onAddToCart(product);
+    } else if (cart.add) {
+      cart.add(product.id, 1);
+      console.log('Added to cart:', product.id);
+    } else {
+      console.warn("No add to cart function available");
+    }
   };
 
   if (!products.length) return null;
@@ -56,72 +97,88 @@ const ProductCarousel = ({
       {/* Header */}
       <div className="product-carousel-header">
         <h2 className="product-carousel-title">{title}</h2>
-        <div className="product-carousel-controls">
-          <Button
-            variant="outline"
-            size="small"
-            disabled={!canLeft}
-            onClick={() => scroll('left')}
-            icon={<ChevronLeft size={20} />}
-            aria-label="Scroll left"
-            type="button"
-          />
-          <Button
-            variant="outline"
-            size="small"
-            disabled={!canRight}
-            onClick={() => scroll('right')}
-            icon={<ChevronRight size={20} />}
-            aria-label="Scroll right"
-            type="button"
-          />
-        </div>
       </div>
 
-      {/* End-arrows placement & scroll area */}
-      <div className="product-carousel-container">
-        {/* End arrows (outside edges on desktop/tablet) */}
+      {/* Carousel Container */}
+      <div className="pc-wrap">
+        {/* Desktop Navigation Arrows */}
         <button
           type="button"
-          className="pc-end-arrow pc-end-arrow-left d-none d-sm-flex"
+          className="pc-end-arrow pc-end-arrow-left"
           onClick={() => scroll('left')}
           disabled={!canLeft}
-          aria-label="Föregående"
+          aria-label="Föregående produkter"
+          style={{ display: canLeft ? 'flex' : 'none' }}
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft size={20} />
         </button>
 
-        <div ref={scrollRef} className="product-carousel-scroll" role="list" aria-label="Produktkarusell">
+        {/* Scrollable Track */}
+        <div 
+          ref={scrollRef} 
+          className="pc-track" 
+          role="list" 
+          aria-label={`${title} produkter`}
+        >
           {products.map((product, index) => (
-            <div key={product?.id || index} className="product-carousel-slide" role="listitem">
-              <ProductCard
-                product={product}
-                featured={featured}
-                onAddToCart={add}
-                onWishlist={onWishlist}
-                onQuickView={onQuickView}
-              />
-              <div className="pc-underline" />
+            <div 
+              key={product?.id || index} 
+              className="pc-slide" 
+              role="listitem"
+            >
+              <div 
+                className="product-card-clickable"
+                onClick={(e) => handleProductClick(product, e)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleProductClick(product, e);
+                  }
+                }}
+                aria-label={`Visa ${product.title || product.name}`}
+              >
+                <ProductCard
+                  product={product}
+                  featured={featured}
+                  onAddToCart={handleAddToCart}
+                  className="card-like"
+                />
+              </div>
             </div>
           ))}
         </div>
 
+        {/* Right Navigation Arrow */}
         <button
           type="button"
-          className="pc-end-arrow pc-end-arrow-right d-none d-sm-flex"
+          className="pc-end-arrow pc-end-arrow-right"
           onClick={() => scroll('right')}
           disabled={!canRight}
-          aria-label="Nästa"
+          aria-label="Nästa produkter"
+          style={{ display: canRight ? 'flex' : 'none' }}
         >
-          <ChevronRight size={18} />
+          <ChevronRight size={20} />
         </button>
 
-        {/* Mobile overlay arrows (still allow swipe) */}
+        {/* Mobile Touch Navigation */}
         <div className="pc-mobile-arrows d-flex d-md-none" aria-hidden="true">
-          <button type="button" className="pc-mobile-btn" onClick={() => scroll('left')} disabled={!canLeft}>
+          <button 
+            type="button" 
+            className="pc-mobile-btn" 
+            onClick={() => scroll('left')} 
+            disabled={!canLeft}
+            aria-label="Föregående"
+          >
             <ChevronLeft size={18} />
           </button>
-          <button type="button" className="pc-mobile-btn" onClick={() => scroll('right')} disabled={!canRight}>
+          <button 
+            type="button" 
+            className="pc-mobile-btn" 
+            onClick={() => scroll('right')} 
+            disabled={!canRight}
+            aria-label="Nästa"
+          >
             <ChevronRight size={18} />
           </button>
         </div>

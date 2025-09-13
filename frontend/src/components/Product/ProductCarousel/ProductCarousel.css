@@ -11,132 +11,341 @@
   --shadow-sm:0 2px 8px rgba(16,24,40,.08);
   --shadow-md:0 8px 24px rgba(16,24,40,.10);
 
-  /* Card width targets (tuned to show ~5 items on wide screens) */
-  --pc-card-w-lg: 230px;   /* ≥1200px */
+  /* Card width targets (tuned to show ~4-5 items on wide screens) */
+  --pc-card-w-xl: 280px;   /* ≥1400px */
+  --pc-card-w-lg: 260px;   /* ≥1200px */
   --pc-card-w-md: 240px;   /* 992–1199 */
   --pc-card-w-sm: 220px;   /* 768–991  */
 }
 
-/* container card */
-.pc-wrap{
-  position:relative;
-  background:var(--color-surface);
-  border:1px solid var(--color-border);
-  border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-sm);
-  padding: 1rem 2.5rem 1.1rem; /* extra side padding so end arrows sit outside content */
-  overflow: visible;           /* allow arrows to sit slightly outside */
+/* =========================
+   Product Carousel Container
+   ========================= */
+
+.product-carousel {
+  width: 100%;
+  margin: 2rem 0;
 }
 
-/* TRACK — native swipe with snap */
-.pc-track{
-  display:flex;
-  gap:16px;
-  overflow-x:auto;
-  overflow-y:hidden;
-  scroll-snap-type:x mandatory;
-  -webkit-overflow-scrolling:touch;
-  padding: .25rem .25rem .75rem;
-  scrollbar-width:none;
+.product-carousel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 0 1rem;
 }
-.pc-track::-webkit-scrollbar{ display:none; }
 
-/* SLIDE WIDTHS — target 5 across on desktops like screenshot */
-.pc-slide{ flex: 0 0 var(--pc-card-w-lg); scroll-snap-align:center; position:relative; }
-@media (max-width: 1199.98px){ .pc-slide{ flex-basis: var(--pc-card-w-md);} }
-@media (max-width: 991.98px){  .pc-slide{ flex-basis: var(--pc-card-w-sm);} }
-@media (max-width: 767.98px){  .pc-slide{ flex-basis: 70vw; } }     /* 1–2 visible on phones */
-@media (max-width: 575.98px){  .pc-slide{ flex-basis: 85vw; } }     /* one big card on small phones */
-
-/* Underline under center-ish item (we compute active in JS) */
-.pc-underline{
-  height:3px; width:28px; background:transparent;
-  margin:.5rem auto 0; border-radius:3px; transition:background .2s ease, width .2s ease;
+.product-carousel-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+  letter-spacing: -0.025em;
 }
-.pc-underline.active{ background:var(--color-primary); width:36px; }
 
-/* END ARROWS — at far left/right ends of the carousel container */
-.pc-end-arrow{
-  position:absolute; top:50%; transform:translateY(-50%);
-  width:40px; height:40px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  background:#fff; border:1px solid rgba(0,0,0,.08);
-  color:#64748b; box-shadow:0 2px 8px rgba(16,24,40,.15);
-  z-index:3;
+/* =========================
+   Main Carousel Wrapper
+   ========================= */
+
+.pc-wrap {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 1rem 3rem 1.5rem; /* Extra side padding for arrows */
+  overflow: visible; /* Allow arrows to sit outside */
+  margin: 0 1rem;
 }
-.pc-end-arrow-left { left: -18px; }   /* slightly outside the white card */
-.pc-end-arrow-right{ right: -18px; }
-.pc-end-arrow:hover{ background:var(--color-primary-50); color:var(--color-primary-600); }
-.pc-end-arrow:disabled{ opacity:.45; cursor:default; }
 
-/* MOBILE OVERLAY ARROWS (keep for thumb reach) */
-.pc-mobile-arrows{
-  position:absolute; inset:0; pointer-events:none; align-items:center; justify-content:space-between;
-  padding: 0 .5rem;
+/* =========================
+   Horizontal Scroll Track - CRITICAL FOR LAYOUT
+   ========================= */
+
+.pc-track {
+  display: flex !important; /* Force horizontal layout */
+  flex-direction: row !important; /* Ensure row direction */
+  gap: 1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem 0.25rem 1rem;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  
+  /* Soft edge fade */
+  mask-image: linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
 }
-.pc-mobile-btn{
-  pointer-events:auto; width:36px; height:36px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  background:rgba(255,255,255,.92); border:1px solid rgba(0,0,0,.08);
-  color:#64748b; box-shadow:0 2px 8px rgba(16,24,40,.15);
+
+.pc-track::-webkit-scrollbar { 
+  display: none; 
 }
-.pc-mobile-btn:disabled{ opacity:.45; }
-.pc-mobile-btn:active{ transform:scale(.96); }
 
-/* Hover elevation harmony */
-.pc-slide .card-like{ transition: transform .15s ease, box-shadow .15s ease; }
-.pc-slide:hover .card-like{ transform: translateY(-2px); box-shadow: var(--shadow-md); }
+/* =========================
+   Individual Slide Layout - CRITICAL FOR SIZING
+   ========================= */
 
-/* Adaptive product images (works with your ProductCard) */
-.pc-slide img{
-  width:100%;
-  height: clamp(150px, 16vw, 210px);  /* adapts to viewport; keeps “row height” consistent */
+.pc-slide { 
+  flex: 0 0 var(--pc-card-w-lg); /* Fixed width, no grow/shrink */
+  scroll-snap-align: start;
+  position: relative;
+  min-width: 0; /* Prevent flex item overflow */
+}
+
+/* Responsive slide widths */
+@media (min-width: 1400px) { .pc-slide { flex-basis: var(--pc-card-w-xl); } }
+@media (max-width: 1199.98px) { .pc-slide { flex-basis: var(--pc-card-w-md); } }
+@media (max-width: 991.98px) { .pc-slide { flex-basis: var(--pc-card-w-sm); } }
+@media (max-width: 767.98px) { .pc-slide { flex-basis: 75vw; min-width: 240px; } }
+@media (max-width: 575.98px) { .pc-slide { flex-basis: 80vw; min-width: 200px; } }
+
+/* =========================
+   Product Card in Carousel
+   ========================= */
+
+.pc-slide .product-card {
+  height: 100%;
+  width: 100%;
+}
+
+.pc-slide .product-card-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.pc-slide .product-card-container:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+/* =========================
+   Clickable Area
+   ========================= */
+
+.product-card-clickable {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.product-card-clickable:hover {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* =========================
+   Underline Indicator
+   ========================= */
+
+.pc-underline {
+  height: 3px;
+  width: 28px;
+  background: transparent;
+  margin: 0.5rem auto 0;
+  border-radius: 3px;
+  transition: background 0.2s ease, width 0.2s ease;
+}
+
+.pc-underline.active {
+  background: var(--color-primary);
+  width: 36px;
+}
+
+/* =========================
+   Navigation Arrows
+   ========================= */
+
+.pc-end-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.08);
+  color: #64748b;
+  box-shadow: 0 4px 12px rgba(16,24,40,.15);
+  z-index: 3;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pc-end-arrow-left { 
+  left: -22px; 
+}
+
+.pc-end-arrow-right { 
+  right: -22px; 
+}
+
+.pc-end-arrow:hover {
+  background: var(--color-primary-50);
+  color: var(--color-primary-600);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.pc-end-arrow:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: translateY(-50%) scale(1);
+}
+
+/* =========================
+   Mobile Overlay Arrows
+   ========================= */
+
+.pc-mobile-arrows {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.5rem;
+}
+
+.pc-mobile-btn {
+  pointer-events: auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(0,0,0,.08);
+  color: #64748b;
+  box-shadow: 0 2px 12px rgba(16,24,40,.2);
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+
+.pc-mobile-btn:disabled {
+  opacity: 0.45;
+}
+
+.pc-mobile-btn:active {
+  transform: scale(0.95);
+}
+
+.pc-mobile-btn:hover {
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+}
+
+/* =========================
+   Product Images in Carousel
+   ========================= */
+
+.pc-slide .product-card-image {
+  width: 100%;
+  height: clamp(180px, 20vh, 220px);
   object-fit: contain;
   background: var(--color-bg);
   border-radius: var(--radius-md);
+  transition: transform 0.2s ease;
 }
 
-
-/* Keep your existing theme variables and styles… */
-
-/* Soft edge fade so content blends with the white container */
-.pc-track{
-  /* your existing rules … */
-  mask-image: linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
-  scroll-behavior: smooth;              /* keyboard & wheel smoothness */
+.pc-slide .product-card-container:hover .product-card-image {
+  transform: scale(1.02);
 }
 
-/* Optional: if you prefer no mask support, add subtle overlays too */
+/* =========================
+   Button Interaction Fix
+   ========================= */
+
+.pc-slide .product-card-cta {
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.pc-slide .product-card-content .btn {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+}
+
+/* =========================
+   Soft Edge Overlays (Fallback)
+   ========================= */
+
 .pc-wrap::before,
-.pc-wrap::after{
-  content:"";
-  position:absolute; top:0; bottom:0; width:28px;
-  pointer-events:none; z-index:2;
+.pc-wrap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  z-index: 2;
 }
-.pc-wrap::before{
-  left:0;
+
+.pc-wrap::before {
+  left: 0;
   background: linear-gradient(90deg, var(--color-surface) 0%, rgba(255,255,255,0) 100%);
 }
-.pc-wrap::after{
-  right:0;
+
+.pc-wrap::after {
+  right: 0;
   background: linear-gradient(270deg, var(--color-surface) 0%, rgba(255,255,255,0) 100%);
 }
 
-/* Make the row feel calmer by locking height a bit tighter */
-.pc-slide .product-media{ /* leverages the wrapper we added */
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,.02);
+/* =========================
+   Responsive Adjustments
+   ========================= */
+
+@media (max-width: 768px) {
+  .pc-wrap {
+    padding: 1rem 1.5rem;
+    margin: 0 0.5rem;
+  }
+  
+  .pc-end-arrow {
+    display: none !important;
+  }
+  
+  .product-carousel-header {
+    padding: 0 0.5rem;
+  }
+  
+  .product-carousel-title {
+    font-size: 1.5rem;
+  }
+  
+  .pc-track {
+    gap: 0.75rem;
+    padding: 0.25rem 0 1rem;
+  }
 }
 
-/* Keep adaptive image size in carousel rows */
-.pc-slide img{
-  height: clamp(150px, 16vw, 210px);    /* responsive row height */
-  object-fit: contain;
-}
-
-/* Slightly softer arrow hover */
-.pc-end-arrow:hover,
-.pc-mobile-btn:hover{
-  background: var(--color-primary-50);
-  color: var(--color-primary);
+@media (max-width: 480px) {
+  .pc-wrap {
+    padding: 0.75rem 1rem;
+  }
+  
+  .pc-mobile-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .pc-track {
+    gap: 0.5rem;
+  }
 }

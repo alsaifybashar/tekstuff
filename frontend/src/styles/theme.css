@@ -1,0 +1,319 @@
+/* =========================
+   Unified Website Theme - Matching CartPage
+   ========================= */
+
+:root {
+  /* Primary Colors - Matching CartPage */
+  --color-primary: #007bff;
+  --color-primary-600: #0056b3;
+  --color-primary-50: #e3f2fd;
+  
+  /* Surface Colors */
+  --color-bg: #f8f9fa;
+  --color-surface: #ffffff;
+  --color-border: #e9ecef;
+  --color-divider: #dee2e6;
+  
+  /* Text Colors */
+  --color-text: #333333;
+  --color-text-muted: #6c757d;
+  --color-text-light: #9ca3af;
+  
+  /* Status Colors */
+  --color-success: #28a745;
+  --color-danger: #dc3545;
+  --color-warning: #ffc107;
+  --color-info: #17a2b8;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 123, 255, 0.1);
+  --shadow-lg: 0 8px 24px rgba(16, 24, 40, 0.10);
+  
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+/* =========================
+   Global Resets & Base Styles
+   ========================= */
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+/* =========================
+   Card Components
+   ========================= */
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* =========================
+   Button System - Matching CartPage
+   ========================= */
+
+.btn {
+  font-family: var(--font-family);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-outline-primary {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: transparent;
+}
+
+.btn-outline-primary:hover:not(:disabled) {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+/* =========================
+   Navigation
+   ========================= */
+
+.navbar {
+  background: var(--color-surface) !important;
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.navbar-brand {
+  color: var(--color-text) !important;
+  font-weight: 700;
+}
+
+/* =========================
+   Forms & Inputs
+   ========================= */
+
+.form-control {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  transition: all var(--transition-base);
+}
+
+.form-control:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-50);
+}
+
+/* =========================
+   Product Cards
+   ========================= */
+
+.product-card .card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card .btn {
+  margin-top: auto;
+}
+
+/* =========================
+   Badge System
+   ========================= */
+
+.badge {
+  font-weight: 600;
+  font-size: var(--font-size-xs);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-lg);
+}
+
+.badge.bg-danger {
+  background-color: var(--color-danger) !important;
+}
+
+.badge.bg-success {
+  background-color: var(--color-success) !important;
+}
+
+.badge.bg-primary {
+  background-color: var(--color-primary) !important;
+}
+
+/* =========================
+   Loading States
+   ========================= */
+
+.loading-shimmer {
+  background: linear-gradient(90deg, #f1f3f4 25%, #e9ecef 50%, #f1f3f4 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* =========================
+   Utility Classes
+   ========================= */
+
+.text-primary {
+  color: var(--color-primary) !important;
+}
+
+.text-muted {
+  color: var(--color-text-muted) !important;
+}
+
+.bg-light {
+  background-color: var(--color-bg) !important;
+}
+
+.border {
+  border-color: var(--color-border) !important;
+}
+
+.shadow-sm {
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.shadow {
+  box-shadow: var(--shadow-md) !important;
+}
+
+/* =========================
+   Responsive Improvements
+   ========================= */
+
+@media (max-width: 768px) {
+  .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* =========================
+   Accessibility Improvements
+   ========================= */
+
+.btn:focus-visible,
+.form-control:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Ensure sufficient color contrast */
+.text-muted {
+  color: #495057 !important; /* Darker for better contrast */
+}
+
+/* =========================
+   Animation Improvements
+   ========================= */
+
+.card,
+.btn,
+.product-card-container {
+  transition: all var(--transition-base);
+}
+
+.product-card-container:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Smooth scrolling for carousel */
+.pc-track {
+  scroll-behavior: smooth;
+}
+
+/* =========================
+   Print Styles
+   ========================= */
+
+@media print {
+  .navbar,
+  .footer,
+  .btn,
+  .pc-end-arrow,
+  .pc-mobile-arrows {
+    display: none !important;
+  }
+  
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+}

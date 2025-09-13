@@ -171,5 +171,227 @@ export default [
       connector: "Qi Wireless",
       cableLength: "1m USB-C cable included"
     }
+  },
+  {
+    id: "wireless-charger-15w",
+    title: "Trådlös Laddare 15W Qi",
+    slug: "tradlos-laddare-15w-qi",
+    category: "chargers",
+    brand: "Samsung",
+    sku: "SAMS-QI-15W",
+    price: 299,
+    oldPrice: 399,
+    inStock: true,
+    isDeal: true,
+    image: imgLaddare14,
+    images: [
+      imgLaddare14,
+      imgLaddare15,
+      imgLaddare16,
+    ],
+    description: "Snabb trådlös laddning upp till 15W för Qi-kompatibla enheter.",
+    longDescription: "Trådlös laddningsplatta som stöder snabbladdning upp till 15W för Samsung-telefoner och 7.5W för iPhones. LED-indikator visar laddningsstatus.",
+    specs: {
+      Effekt: "15W max",
+      Standard: "Qi Wireless",
+      iPhone: "7.5W",
+      Samsung: "15W", 
+      Mått: "100×100×8 mm",
+      Vikt: "150 g",
+      Färg: "Svart",
+      Garanti: "2 år"
+    },
+    rating: 4.3,
+    tags: ["trådlös", "qi", "15w", "samsung"],
+    attrs: {
+      type: "Wireless Charger",
+      connector: "Qi Wireless",
+      cableLength: "1m USB-C cable included"
+    }
+  },
+  {
+    id: "wireless-charger-15w",
+    title: "Trådlös Laddare 15W Qi",
+    slug: "tradlos-laddare-15w-qi",
+    category: "chargers",
+    brand: "Samsung",
+    sku: "SAMS-QI-15W",
+    price: 299,
+    oldPrice: 399,
+    inStock: true,
+    isDeal: true,
+    image: imgLaddare14,
+    images: [
+      imgLaddare14,
+      imgLaddare15,
+      imgLaddare16,
+    ],
+    description: "Snabb trådlös laddning upp till 15W för Qi-kompatibla enheter.",
+    longDescription: "Trådlös laddningsplatta som stöder snabbladdning upp till 15W för Samsung-telefoner och 7.5W för iPhones. LED-indikator visar laddningsstatus.",
+    specs: {
+      Effekt: "15W max",
+      Standard: "Qi Wireless",
+      iPhone: "7.5W",
+      Samsung: "15W", 
+      Mått: "100×100×8 mm",
+      Vikt: "150 g",
+      Färg: "Svart",
+      Garanti: "2 år"
+    },
+    rating: 4.3,
+    tags: ["trådlös", "qi", "15w", "samsung"],
+    attrs: {
+      type: "Wireless Charger",
+      connector: "Qi Wireless",
+      cableLength: "1m USB-C cable included"
+    }
+  },
+  {
+    id: "wireless-charger-15w",
+    title: "Trådlös Laddare 15W Qi",
+    slug: "tradlos-laddare-15w-qi",
+    category: "chargers",
+    brand: "Samsung",
+    sku: "SAMS-QI-15W",
+    price: 299,
+    oldPrice: 399,
+    inStock: true,
+    isDeal: true,
+    image: imgLaddare14,
+    images: [
+      imgLaddare14,
+      imgLaddare15,
+      imgLaddare16,
+    ],
+    description: "Snabb trådlös laddning upp till 15W för Qi-kompatibla enheter.",
+    longDescription: "Trådlös laddningsplatta som stöder snabbladdning upp till 15W för Samsung-telefoner och 7.5W för iPhones. LED-indikator visar laddningsstatus.",
+    specs: {
+      Effekt: "15W max",
+      Standard: "Qi Wireless",
+      iPhone: "7.5W",
+      Samsung: "15W", 
+      Mått: "100×100×8 mm",
+      Vikt: "150 g",
+      Färg: "Svart",
+      Garanti: "2 år"
+    },
+    rating: 4.3,
+    tags: ["trådlös", "qi", "15w", "samsung"],
+    attrs: {
+      type: "Wireless Charger",
+      connector: "Qi Wireless",
+      cableLength: "1m USB-C cable included"
+    }
+  },
+  {
+    id: "wireless-charger-15w",
+    title: "Trådlös Laddare 15W Qi",
+    slug: "tradlos-laddare-15w-qi",
+    category: "chargers",
+    brand: "Samsung",
+    sku: "SAMS-QI-15W",
+    price: 299,
+    oldPrice: 399,
+    inStock: true,
+    isDeal: true,
+    image: imgLaddare14,
+    images: [
+      imgLaddare14,
+      imgLaddare15,
+      imgLaddare16,
+    ],
+    description: "Snabb trådlös laddning upp till 15W för Qi-kompatibla enheter.",
+    longDescription: "Trådlös laddningsplatta som stöder snabbladdning upp till 15W för Samsung-telefoner och 7.5W för iPhones. LED-indikator visar laddningsstatus.",
+    specs: {
+      Effekt: "15W max",
+      Standard: "Qi Wireless",
+      iPhone: "7.5W",
+      Samsung: "15W", 
+      Mått: "100×100×8 mm",
+      Vikt: "150 g",
+      Färg: "Svart",
+      Garanti: "2 år"
+    },
+    rating: 4.3,
+    tags: ["trådlös", "qi", "15w", "samsung"],
+    attrs: {
+      type: "Wireless Charger",
+      connector: "Qi Wireless",
+      cableLength: "1m USB-C cable included"
+    }
+  },
+  {
+    id: "wireless-charger-15w",
+    title: "Trådlös Laddare 15W Qi",
+    slug: "tradlos-laddare-15w-qi",
+    category: "chargers",
+    brand: "Samsung",
+    sku: "SAMS-QI-15W",
+    price: 299,
+    oldPrice: 399,
+    inStock: true,
+    isDeal: true,
+    image: imgLaddare14,
+    images: [
+      imgLaddare14,
+      imgLaddare15,
+      imgLaddare16,
+    ],
+    description: "Snabb trådlös laddning upp till 15W för Qi-kompatibla enheter.",
+    longDescription: "Trådlös laddningsplatta som stöder snabbladdning upp till 15W för Samsung-telefoner och 7.5W för iPhones. LED-indikator visar laddningsstatus.",
+    specs: {
+      Effekt: "15W max",
+      Standard: "Qi Wireless",
+      iPhone: "7.5W",
+      Samsung: "15W", 
+      Mått: "100×100×8 mm",
+      Vikt: "150 g",
+      Färg: "Svart",
+      Garanti: "2 år"
+    },
+    rating: 4.3,
+    tags: ["trådlös", "qi", "15w", "samsung"],
+    attrs: {
+      type: "Wireless Charger",
+      connector: "Qi Wireless",
+      cableLength: "1m USB-C cable included"
+    }
+  },
+  {
+    id: "wireless-charger-15w",
+    title: "Trådlös Laddare 15W Qi",
+    slug: "tradlos-laddare-15w-qi",
+    category: "chargers",
+    brand: "Samsung",
+    sku: "SAMS-QI-15W",
+    price: 299,
+    oldPrice: 399,
+    inStock: true,
+    isDeal: true,
+    image: imgLaddare14,
+    images: [
+      imgLaddare14,
+      imgLaddare15,
+      imgLaddare16,
+    ],
+    description: "Snabb trådlös laddning upp till 15W för Qi-kompatibla enheter.",
+    longDescription: "Trådlös laddningsplatta som stöder snabbladdning upp till 15W för Samsung-telefoner och 7.5W för iPhones. LED-indikator visar laddningsstatus.",
+    specs: {
+      Effekt: "15W max",
+      Standard: "Qi Wireless",
+      iPhone: "7.5W",
+      Samsung: "15W", 
+      Mått: "100×100×8 mm",
+      Vikt: "150 g",
+      Färg: "Svart",
+      Garanti: "2 år"
+    },
+    rating: 4.3,
+    tags: ["trådlös", "qi", "15w", "samsung"],
+    attrs: {
+      type: "Wireless Charger",
+      connector: "Qi Wireless",
+      cableLength: "1m USB-C cable included"
+    }
   }
 ];

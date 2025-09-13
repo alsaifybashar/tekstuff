@@ -1,5 +1,6 @@
 .product-card {
   height: 100%;
+  width: 100%;
 }
 
 .product-card-container {
@@ -9,8 +10,10 @@
   overflow: hidden;
   transition: all 0.2s;
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 400px; /* Ensure consistent height */
 }
 
 .product-card-container:hover {
@@ -24,6 +27,8 @@
   height: 200px;
   background: #f8f9fa;
   overflow: hidden;
+  border-bottom: 1px solid #e9ecef;
+  flex-shrink: 0; /* Prevent image area from shrinking */
 }
 
 .product-card-image-wrapper {
@@ -73,65 +78,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-}
-
-.product-card-wishlist {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  width: 32px;
-  height: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: #6c757d;
-  backdrop-filter: blur(4px);
-}
-
-.product-card-wishlist:hover,
-.product-card-wishlist.active {
-  background: #dc3545;
-  color: white;
-  border-color: #dc3545;
-}
-
-.product-card-actions {
-  position: absolute;
-  bottom: 0.75rem;
-  right: 0.75rem;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.2s;
-}
-
-.product-card-container:hover .product-card-actions {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.product-card-action-btn {
-  width: 32px;
-  height: 32px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: #6c757d;
-  backdrop-filter: blur(4px);
-}
-
-.product-card-action-btn:hover {
-  background: white;
-  color: #007bff;
 }
 
 .product-card-content {
@@ -230,40 +176,4 @@
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
-}
-
-
-
-.product-card-image-area {
-  position: relative;
-  height: 220px; /* slightly taller for better proportions */
-  background: #f8f9fa;
-  overflow: hidden;
-  border-bottom: 1px solid #e9ecef; /* adds subtle separation */
-}
-
-.product-card-image-wrapper {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0; /* remove padding so image can fill */
-}
-
-.product-card-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* ✅ fills the wrapper */
-  transition: transform 0.3s, opacity 0.3s;
-  opacity: 0;
-  border-radius: 0; /* keep edges clean with card */
-}
-
-.product-card-image.loaded {
-  opacity: 1;
-}
-
-.product-card-container:hover .product-card-image {
-  transform: scale(1.05); /* smooth zoom on hover */
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, ShoppingCart, Eye, Star } from 'lucide-react';
+import { ShoppingCart, Star } from 'lucide-react';
 import Button from '../../UI/Button/Button';
 import Badge from '../../UI/Badge/Badge';
 import { useCart } from '../../../context/CartContext.jsx';
@@ -8,13 +8,10 @@ import './ProductCard.css';
 const ProductCard = ({
   product,
   onAddToCart,   // optional override
-  onWishlist,
-  onQuickView,
   featured = false,
   className = ''
 }) => {
   const cart = useCart();
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   if (!product) return null;
@@ -33,18 +30,31 @@ const ProductCard = ({
   const formatPrice = (p) =>
     new Intl.NumberFormat('sv-SE', { maximumFractionDigits: 0 }).format(Number(p || 0));
 
-  const handleWishlist = () => {
-    const next = !isWishlisted;
-    setIsWishlisted(next);
-    onWishlist?.(product, next);
-  };
+  const handleAddToCart = (e) => {
+    // Prevent the click from bubbling up to the parent card click handler
+    if (e && typeof e.stopPropagation === 'function') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
-  const handleAddToCart = () => {
-    if (onAddToCart) onAddToCart(product);
-    else cart.addItem(product, 1); // ✅ fallback so button always works
-  };
+    if (!product.inStock) {
+      console.warn('Product is out of stock');
+      return;
+    }
 
-  const handleQuickView = () => onQuickView?.(product);
+    try {
+      if (onAddToCart) {
+        onAddToCart(product);
+      } else if (cart.add) {
+        cart.add(product.id, 1);
+        console.log('Added to cart:', product.id);
+      } else {
+        console.warn("No add to cart function available");
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
+  };
 
   return (
     <div className={`product-card ${featured ? 'product-card-featured' : ''} ${className}`}>
@@ -74,28 +84,6 @@ const ProductCard = ({
               {discount && <Badge variant="success" size="small">-{discount}%</Badge>}
             </div>
           )}
-
-          {/* Wishlist */}
-          <button
-            className={`product-card-wishlist ${isWishlisted ? 'active' : ''}`}
-            onClick={handleWishlist}
-            aria-label="Toggle wishlist"
-            type="button"
-          >
-            <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} />
-          </button>
-
-          {/* Quick view */}
-          <div className="product-card-actions">
-            <button
-              className="product-card-action-btn"
-              onClick={handleQuickView}
-              aria-label="Quick view"
-              type="button"
-            >
-              <Eye size={16} />
-            </button>
-          </div>
         </div>
 
         {/* Content */}

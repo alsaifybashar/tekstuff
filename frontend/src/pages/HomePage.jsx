@@ -19,7 +19,7 @@ import allProducts from '../data/products.js';
 import './HomePage.css';
 
 export default function HomePage() {
-  const { add } = useCart();
+  const cart = useCart();
 
   // Process your existing products
   const featuredDeals = allProducts?.filter(p => p.isDeal || p.oldPrice) || [];
@@ -27,17 +27,16 @@ export default function HomePage() {
 
   // Event handlers
   const handleAddToCart = (product) => {
-    if (product.id && product.inStock) {
-      add(product.id, 1);
+    if (product && product.id && product.inStock) {
+      if (cart.add) {
+        cart.add(product.id, 1);
+        console.log('Added to cart:', product.id);
+      } else {
+        console.warn('Cart add function not available');
+      }
+    } else {
+      console.warn('Cannot add to cart: invalid product or out of stock', product);
     }
-  };
-
-  const handleWishlist = (product, isAdded) => {
-    console.log('Wishlist:', product.id, isAdded);
-  };
-
-  const handleQuickView = (product) => {
-    console.log('Quick view:', product.id);
   };
 
   const handleExploreProducts = () => {
@@ -85,8 +84,6 @@ export default function HomePage() {
             }}
           />
 
-      
-
           {/* Featured Deals */}
           {featuredDeals.length > 0 && (
             <Section>
@@ -95,8 +92,6 @@ export default function HomePage() {
                 products={featuredDeals}
                 featured={true}
                 onAddToCart={handleAddToCart}
-                onWishlist={handleWishlist}
-                onQuickView={handleQuickView}
               />
             </Section>
           )}
@@ -108,8 +103,6 @@ export default function HomePage() {
                 title="Populära produkter"
                 products={popularProducts}
                 onAddToCart={handleAddToCart}
-                onWishlist={handleWishlist}
-                onQuickView={handleQuickView}
               />
             </Section>
           )}

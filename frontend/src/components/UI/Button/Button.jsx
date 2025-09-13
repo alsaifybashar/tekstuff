@@ -26,7 +26,11 @@ const Button = ({
 
   const handleClick = (e) => {
     if (!disabled && !loading && onClick) {
-      onClick(e);
+      try {
+        onClick(e);
+      } catch (error) {
+        console.error('Button click error:', error);
+      }
     }
   };
 

@@ -96,6 +96,19 @@ export default function HomePage() {
             </Section>
           )}
 
+          {/* Featured Deals */}
+          {featuredDeals.length > 0 && (
+            <Section>
+              <ProductCarousel
+                title="Super Deals"
+                products={featuredDeals}
+                featured={true}
+                onAddToCart={handleAddToCart}
+              />
+            </Section>
+          )}
+
+          
           {/* Popular Products */}
           {popularProducts.length > 0 && (
             <Section>

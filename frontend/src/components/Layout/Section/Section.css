@@ -13,18 +13,17 @@
 }
 
 .custom-section-normal {
-  padding: 2rem;
-  margin-bottom: 3rem;
+  margin-bottom: 5px;
 }
 
 .custom-section-large {
-  padding: 4rem 2rem;
-  margin-bottom: 3rem;
+  padding: 5px 5px;
+  margin-bottom: 5px;
 }
 
 .custom-section-small {
-  padding: 1rem;
-  margin-bottom: 2rem;
+  padding: 5px;
+  margin-bottom: 5px;
 }
 
 .custom-section-container {
@@ -39,7 +38,7 @@
   }
   
   .custom-section-large {
-    padding: 2rem 1rem;
+    padding: 5px 1rem;
     margin: 0 1rem 2rem 1rem;
   }
 }

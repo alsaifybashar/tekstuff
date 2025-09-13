@@ -1,20 +1,26 @@
 // components/CategoryStrip.jsx
 import { useEffect, useRef, useState } from "react";
 import Container from "react-bootstrap/Container";
-import { ChevronLeft, ChevronRight } from "lucide-react"; // or react-icons/bs
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-// Swap emojis for your SVGs or <img> icons when ready
+// ✅ Import SVGs as URLs (works without any plugin)
+import batteryChargingUrl from "../assets/icon/battery-charging.svg";
+import cableUrl from "../assets/icon/cable.svg";
+import smartphoneUrl from "../assets/icon/smartphone.svg";
+
+// Map URLs to ids you’ll use below
+const icons = {
+  battery: batteryChargingUrl,
+  cable: cableUrl,
+  mobile: smartphoneUrl,
+};
+
 const CATEGORIES = [
-  { id: "outlet", label: "OUTLET", emoji: "🏷️" },
-  { id: "computers", label: "DATORER & KONTOR", emoji: "💻" },
-  { id: "appliances", label: "VITVAROR", emoji: "🧺" },
-  { id: "tv", label: "TV, LJUD & SMART HEM", emoji: "📺" },
-  { id: "mobile", label: "MOBILER, TABLETS & SMARTKLOCKOR", emoji: "📱" },
-  { id: "gaming", label: "GAMING", emoji: "🎮" },
-  { id: "home", label: "HEM, HUSHÅLL & TRÄDGÅRD", emoji: "🧰" },
-  { id: "beauty", label: "PERSONVÅRD, HÄLSA & SKÖNHET", emoji: "💄" },
-  { id: "kitchen", label: "EPOQ KÖK & TVÄTTSTUGA", emoji: "🍳" },
-  { id: "services", label: "TJÄNSTER", emoji: "➕" },
+  { id: "outlet",     label: "DEALS",                          emoji: "🏷️" },
+  { id: "computers",  label: "DATORER & KONTOR",               icon: icons.battery },
+  { id: "appliances", label: "VITVAROR",                       icon: icons.cable },
+  { id: "tv",         label: "TV, LJUD & SMART HEM",           icon: icons.tv },
+  { id: "mobile",     label: "MOBILER, TABLETS & SMARTKLOCKOR",icon: icons.mobile },
 ];
 
 export default function CategoryStrip({ onSelect }) {
@@ -48,18 +54,11 @@ export default function CategoryStrip({ onSelect }) {
   return (
     <div className="cat-strip-wrap">
       <Container fluid="xl" className="py-3 position-relative">
-        {/* Arrow buttons (only shown when needed) */}
-        <button
-          className="cat-nav left"
-          aria-label="Scroll categories left"
-          onClick={() => scrollByAmount(-280)}
-          disabled={!canLeft}
-        >
+        <button className="cat-nav left" onClick={() => scrollByAmount(-280)} disabled={!canLeft} aria-label="Scroll categories left">
           <ChevronLeft size={20} />
         </button>
 
-        {/* The one-line track */}
-        <div ref={trackRef} className="cat-track" role="list">
+        <div ref={trackRef} className="cat-track" role="list" aria-label="Kategorier">
           {CATEGORIES.map((c) => (
             <button
               key={c.id}
@@ -69,19 +68,20 @@ export default function CategoryStrip({ onSelect }) {
               aria-label={c.label}
             >
               <span className="cat-icon" aria-hidden="true">
-                {c.emoji}
+                {c.icon ? (
+                  <img src={c.icon} alt="" className="cat-svg" />
+                ) : c.emoji ? (
+                  c.emoji
+                ) : (
+                  <span className="cat-fallback">{c.label.charAt(0)}</span>
+                )}
               </span>
               <span className="cat-title">{c.label}</span>
             </button>
           ))}
         </div>
 
-        <button
-          className="cat-nav right"
-          aria-label="Scroll categories right"
-          onClick={() => scrollByAmount(280)}
-          disabled={!canRight}
-        >
+        <button className="cat-nav right" onClick={() => scrollByAmount(280)} disabled={!canRight} aria-label="Scroll categories right">
           <ChevronRight size={20} />
         </button>
       </Container>

@@ -1,0 +1,273 @@
+# .gitignore
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons
+build/Release
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Uploads directory (in development)
+uploads/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+
+# Build output
+dist/
+build/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Redis dump file
+dump.rdb
+
+# PM2 logs
+.pm2/
+
+---
+
+# COMPLETE SETUP INSTRUCTIONS
+
+## 1. Create the backend directory structure:
+```bash
+mkdir -p backend/{config,middleware,routes,models,controllers,services,utils,data,tests}
+cd backend
+```
+
+## 2. Initialize the project:
+```bash
+npm init -y
+```
+
+## 3. Install dependencies:
+```bash
+npm install express express-rate-limit helmet cors bcryptjs jsonwebtoken mongoose redis joi dotenv compression express-mongo-sanitize express-validator winston nodemailer stripe multer sharp slug uuid
+```
+
+## 4. Install dev dependencies:
+```bash
+npm install -D nodemon jest supertest eslint
+```
+
+## 5. Create environment file:
+```bash
+cp .env.example .env
+```
+
+## 6. Edit .env file with your settings:
+```bash
+nano .env
+```
+
+## 7. Start MongoDB (if running locally):
+```bash
+# On Ubuntu/Debian:
+sudo systemctl start mongod
+
+# Or using Docker:
+docker run -d -p 27017:27017 --name mongodb mongo:latest
+```
+
+## 8. Start Redis (optional, for caching):
+```bash
+# On Ubuntu/Debian:
+sudo systemctl start redis-server
+
+# Or using Docker:
+docker run -d -p 6379:6379 --name redis redis:latest
+```
+
+## 9. Seed the database:
+```bash
+npm run seed
+```
+
+## 10. Start the development server:
+```bash
+npm run dev
+```
+
+## 11. Test the API:
+```bash
+# Test health endpoint
+curl http://localhost:4000/health
+
+# Test products endpoint
+curl http://localhost:4000/v1/products
+
+# Test categories endpoint
+curl http://localhost:4000/v1/categories
+```
+
+## 12. Update your frontend .env file:
+```bash
+# In your frontend directory, update .env or .env.local:
+VITE_API_BASE_URL=http://localhost:4000/v1
+```
+
+## For Production Deployment on Vercel:
+
+### 1. Create vercel.json in backend root:
+```json
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/server.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
+```
+
+### 2. Set environment variables in Vercel dashboard:
+- MONGODB_URI (use MongoDB Atlas)
+- JWT_SECRET
+- REDIS_URL (use Redis Cloud)
+- ALLOWED_ORIGINS (your frontend URL)
+
+### 3. Deploy:
+```bash
+vercel --prod
+```
+
+## Database Setup Options:
+
+### Local MongoDB:
+```bash
+# Install MongoDB Community Edition
+# https://docs.mongodb.com/manual/installation/
+
+# Start MongoDB
+mongod --dbpath ./data/db
+```
+
+### MongoDB Atlas (Recommended for production):
+1. Go to https://www.mongodb.com/atlas
+2. Create a free cluster
+3. Get connection string
+4. Update MONGODB_URI in .env
+
+### Local Redis (Optional):
+```bash
+# Install Redis
+sudo apt-get install redis-server
+
+# Start Redis
+redis-server
+```
+
+### Redis Cloud (Recommended for production):
+1. Go to https://redis.com/try-free/
+2. Create free account
+3. Get connection URL
+4. Update REDIS_URL in .env

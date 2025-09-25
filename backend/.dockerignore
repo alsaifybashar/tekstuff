@@ -1,0 +1,141 @@
+# render.yaml - Render deployment configuration
+services:
+  - type: web
+    name: ecommerce-backend
+    env: node
+    plan: starter # or pro based on your needs
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ecommerce-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://your-frontend-app.vercel.app
+      - key: BCRYPT_ROUNDS
+        value: 12
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+      - key: AUTH_RATE_LIMIT_MAX
+        value: 5
+      - key: MAX_FILE_SIZE
+        value: 5242880
+      - key: ALLOWED_FILE_TYPES
+        value: image/jpeg,image/png,image/webp
+      - key: FROM_EMAIL
+        value: noreply@yourstore.com
+      - key: FROM_NAME
+        value: Your Store Name
+      - key: SUPPORT_EMAIL
+        value: support@yourstore.com
+      # Add your email service credentials
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        sync: false # Set manually in Render dashboard
+      - key: SMTP_PASSWORD
+        sync: false # Set manually in Render dashboard
+      # Add payment credentials (set manually in dashboard)
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+
+databases:
+  - name: ecommerce-db
+    plan: starter # or pro based on your needs
+    databaseName: ecommerce
+    user: ecommerce_user
+
+# Alternative: Docker deployment (if preferred)
+# Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy source code
+COPY . .
+
+# Create uploads directory
+RUN mkdir -p uploads/products uploads/categories
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+
+# Change ownership of uploads directory
+RUN chown -R nextjs:nodejs uploads
+
+USER nextjs
+
+EXPOSE 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node healthcheck.js
+
+CMD ["npm", "start"]
+
+# .dockerignore
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+.env.local
+.env.development
+.env.test
+coverage
+.nyc_output
+logs
+
+# healthcheck.js (for Docker)
+const http = require('http');
+
+const options = {
+  host: 'localhost',
+  port: process.env.PORT || 5000,
+  path: '/health',
+  timeout: 2000,
+};
+
+const request = http.request(options, (res) => {
+  console.log(`STATUS: ${res.statusCode}`);
+  if (res.statusCode === 200) {
+    process.exit(0);
+  } else {
+    process.exit(1);
+  }
+});
+
+request.on('error', (err) => {
+  console.log('ERROR:', err);
+  process.exit(1);
+});
+
+request.end();

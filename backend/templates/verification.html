@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Your Email</title>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h2>Welcome {{firstName}}!</h2>
+    <p>Thank you for registering with {{fromName}}. Please verify your email address by clicking the button below:</p>
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{verificationUrl}}" style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Verify Email</a>
+    </div>
+    <p>If the button doesn't work, copy and paste this link into your browser:</p>
+    <p><a href="{{verificationUrl}}">{{verificationUrl}}</a></p>
+    <p>This link will expire in 24 hours.</p>
+    <hr>
+    <p><small>If you didn't request this, please ignore this email or contact us at {{supportEmail}}</small></p>
+</body>
+</html>

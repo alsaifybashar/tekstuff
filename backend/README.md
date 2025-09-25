@@ -334,15 +334,12 @@ Content-Type: application/json
 
 `Login User`
 ```bash
-POST /api/auth/register
+POST /api/auth/login
 Content-Type: application/json
 
 {
   "email": "user@example.com",
   "password": "SecurePassword123!",
-  "firstName": "John",
-  "lastName": "Doe",
-  "phone": "+1234567890"
 }
 ```
 

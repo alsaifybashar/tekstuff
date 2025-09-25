@@ -182,7 +182,11 @@ const login = async (req, res) => {
     }
 
     // Check if user is verified
+    /*
+    The if-statement has to be change to the following
     if (!user.is_verified) {
+    */
+    if (user.is_verified) {
       await logAuditEvent(user.id, 'login_attempt_unverified', 'user', user.id, req.ip, req.get('user-agent'));
       return res.status(401).json({
         success: false,

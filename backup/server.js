@@ -22,7 +22,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 // New enhanced routes
 const cartRoutes = require('./routes/cartRoutes');
 const searchRoutes = require('./routes/searchRoutes');
-// // const analyticsRoutes = require('./routes/analyticsRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
 
 const app = express();
 
@@ -89,6 +89,7 @@ const corsOptions = {
       process.env.FRONTEND_URL,
       'http://localhost:3000',
       'http://localhost:5173', // Vite default
+      'https://localhost:3000', // HTTPS local development
     ].filter(Boolean);
 
     if (!origin || allowedOrigins.includes(origin)) {
@@ -180,7 +181,7 @@ app.use('/api/categories', categoryRoutes);
 // New enhanced routes
 app.use('/api/cart', cartRoutes);
 app.use('/api/search', searchRoutes);
-// // app.use('/api/analytics', analyticsRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // API documentation endpoint
 app.get('/api/docs', (req, res) => {

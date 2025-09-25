@@ -1,11 +1,8 @@
-// src/pages/ProductPage.jsx
-import { useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
 import Alert from "react-bootstrap/Alert";
 import Spinner from "react-bootstrap/Spinner";
@@ -16,198 +13,188 @@ import ProductImageGallery from "../components/ProductImageGallery";
 import PriceBlock from "../components/PriceBlock";
 import QuantityPicker from "../components/QuantityPicker";
 import ProductCarousel from "../components/Product/ProductCarousel/ProductCarousel";
+import Section from '../components/Layout/Section/Section';
 
 import { useCart } from "../context/CartContext";
-import { getProductBySlug, getProductById, getRelatedProducts } from "../services/catalog";
-
-import Section from '../components/Layout/Section/Section';
-import allProducts from '../data/products.js';
+import { useProduct, useProducts } from "../hooks/useProducts";
 
 const kr = new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 0 });
 
 export default function ProductPage() {
-  const { slug } = useParams(); // route: /p/:slug
+  const { slug } = useParams();
   const { add } = useCart();
-
-  const [product, setProduct] = useState(null);
   const [qty, setQty] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState(null);
-  const [related, setRelated] = useState([]);
 
-  // Get popular products for carousel
-  const popularProducts = allProducts?.filter(p => !p.isDeal).slice(0, 8) || [];
-  
+  // Use backend data
+  const { product, loading, error } = useProduct(slug);
+  const { products: relatedProducts } = useProducts({ 
+    category: product?.category?.slug, 
+    limit: 8 
+  });
+
   const handleAddToCart = (product) => {
-    if (product.id && product.inStock) {
-      add(product.id, 1);
+    if (product?.id && product?.inStock) {
+      add(product.id, qty);
+      console.log(`Added ${qty} of product ${product.id} to cart`);
     }
   };
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      setErr(null);
-      setProduct(null);
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center min-vh-100">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading product...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
-      try {
-        // Try to find product by slug first, then by id
-        let p = getProductBySlug(slug) || getProductById(slug);
+  if (error) {
+    return (
+      <Container className="py-5">
+        <Alert variant="danger">
+          <Alert.Heading>Error</Alert.Heading>
+          <p>{error}</p>
+        </Alert>
+      </Container>
+    );
+  }
 
-        if (!p) {
-          throw new Error("Produkten hittades inte.");
-        }
-
-        // Normalize numerics
-        p.price = Number(p.price) || 0;
-        if (p.oldPrice != null) p.oldPrice = Number(p.oldPrice);
-
-        setProduct(p);
-
-        // Get related products
-        const relatedProducts = getRelatedProducts(p, 8);
-        setRelated(relatedProducts);
-
-      } catch (e) {
-        setErr(e.message || "Något gick fel.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    load();
-  }, [slug]);
-
-  const addToCart = () => {
-    if (!product?.id) return;
-    add(product.id, Math.max(1, Math.floor(qty || 1)));
-  };
-
-  const specs = useMemo(() => {
-    if (!product?.specs) return [];
-
-    // Convert specs object to array of [label, value]
-    return Object.entries(product.specs);
-  }, [product]);
+  if (!product) {
+    return (
+      <Container className="py-5">
+        <Alert variant="warning">
+          <Alert.Heading>Product Not Found</Alert.Heading>
+          <p>The requested product could not be found.</p>
+        </Alert>
+      </Container>
+    );
+  }
 
   return (
     <div className="d-flex flex-column min-vh-100">
       <Navbar />
-
+      
       <main className="flex-grow-1">
-        <Container fluid="xl" className="py-4">
-          {loading && (
-            <div className="d-flex align-items-center gap-2">
-              <Spinner animation="border" size="sm" />
-              <span>Laddar produkt…</span>
-            </div>
-          )}
+        <Container className="py-4">
+          {/* Breadcrumb */}
+          <nav aria-label="breadcrumb" className="mb-4">
+            <ol className="breadcrumb">
+              <li className="breadcrumb-item">
+                <a href="/">Hem</a>
+              </li>
+              {product.category && (
+                <li className="breadcrumb-item">
+                  <a href={`/c/${product.category.slug}`}>
+                    {product.category.name}
+                  </a>
+                </li>
+              )}
+              <li className="breadcrumb-item active" aria-current="page">
+                {product.name}
+              </li>
+            </ol>
+          </nav>
 
-          {err && !loading && (
-            <Alert variant="danger">{err}</Alert>
-          )}
+          <Row>
+            {/* Product Images */}
+            <Col md={6}>
+              <ProductImageGallery 
+                images={product.images} 
+                productName={product.name}
+              />
+            </Col>
 
-          {!loading && !err && product && (
-            <>
-              <Row className="g-4">
-                {/* Left: images */}
-                <Col xs={12} md={6} lg={6}>
-                  <ProductImageGallery
-                    images={product.images?.length ? product.images : [product.image].filter(Boolean)}
-                    alt={product.title || product.name || "Produkt"}
+            {/* Product Info */}
+            <Col md={6}>
+              <div className="product-info">
+                <h1 className="h2 mb-3">{product.name}</h1>
+                
+                {product.shortDescription && (
+                  <p className="lead text-muted mb-4">
+                    {product.shortDescription}
+                  </p>
+                )}
+
+                <PriceBlock 
+                  price={product.price}
+                  oldPrice={product.oldPrice}
+                  className="mb-4"
+                />
+
+                {/* Stock Status */}
+                <div className="mb-4">
+                  {product.inStock ? (
+                    <span className="badge bg-success">
+                      ✓ I lager ({product.stockQuantity} kvar)
+                    </span>
+                  ) : (
+                    <span className="badge bg-danger">
+                      Slut i lager
+                    </span>
+                  )}
+                </div>
+
+                {/* Add to Cart */}
+                <div className="d-flex align-items-center gap-3 mb-4">
+                  <QuantityPicker
+                    value={qty}
+                    onChange={setQty}
+                    max={product.stockQuantity}
+                    disabled={!product.inStock}
                   />
-                </Col>
+                  
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    disabled={!product.inStock}
+                    onClick={() => handleAddToCart(product)}
+                    className="flex-grow-1"
+                  >
+                    {product.inStock ? 'Lägg i varukorg' : 'Slut i lager'}
+                  </Button>
+                </div>
 
-                {/* Right: title, price, actions */}
-                <Col xs={12} md={6} lg={6}>
-                  <div className="d-flex align-items-center gap-2 mb-2">
-                    {product.isDeal && (
-                      <Badge bg="danger">SUPER DEAL</Badge>
+                {/* Product Details */}
+                <div className="product-details">
+                  <h3>Produktdetaljer</h3>
+                  <ul className="list-unstyled">
+                    <li><strong>SKU:</strong> {product.sku}</li>
+                    {product.brand && (
+                      <li><strong>Märke:</strong> {product.brand}</li>
                     )}
-                    {product.inStock ? (
-                      <Badge bg="success">I lager</Badge>
-                    ) : (
-                      <Badge bg="secondary">Ej i lager</Badge>
+                    {product.weight && (
+                      <li><strong>Vikt:</strong> {product.weight}g</li>
                     )}
-                  </div>
+                  </ul>
+                </div>
+              </div>
+            </Col>
+          </Row>
 
-                  <h1 className="h4 mb-1">
-                    {product.title || product.name || "Produkt"}
-                  </h1>
-                  {product.brand && (
-                    <div className="text-muted mb-2">{product.brand}</div>
-                  )}
+          {/* Product Description */}
+          {product.description && (
+            <Row className="mt-5">
+              <Col>
+                <h3>Beskrivning</h3>
+                <div 
+                  className="product-description"
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+              </Col>
+            </Row>
+          )}
 
-                  <PriceBlock price={product.price} oldPrice={product.oldPrice} />
-
-                  <div className="d-flex align-items-center gap-3 mb-3">
-                    <QuantityPicker value={qty} onChange={setQty} min={1} max={99} />
-                    <Button
-                      variant="dark"
-                      size="lg"
-                      disabled={!product.inStock}
-                      onClick={addToCart}
-                    >
-                      Lägg i kundvagn
-                    </Button>
-                  </div>
-
-                  {/* Simple facts/specs */}
-                  {specs.length > 0 && (
-                    <div className="border rounded p-3">
-                      <h2 className="h6 mb-3">Specifikationer</h2>
-                      <dl className="row mb-0">
-                        {specs.map(([k, v]) => (
-                          <div className="col-12 d-flex" key={k}>
-                            <dt className="me-2 text-muted" style={{ width: 120 }}>{k}</dt>
-                            <dd className="mb-1">{String(v)}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                    </div>
-                  )}
-                </Col>
-              </Row>
-
-              {/* Description block */}
-              {product.description && (
-                <Row className="g-4 mt-3">
-                  <Col md={12}>
-                    <div className="border rounded p-3">
-                      <h2 className="h6 mb-2">Produktbeskrivning</h2>
-                      <p className="mb-0">{product.description}</p>
-                    </div>
-                  </Col>
-                </Row>
-              )}
-
-              {/* Long description */}
-              {product.longDescription && (
-                <Row className="g-4 mt-3">
-                  <Col md={12}>
-                    <div className="border rounded p-3">
-                      <h2 className="h6 mb-2">Detaljerad beskrivning</h2>
-                      <p className="mb-0">{product.longDescription}</p>
-                    </div>
-                  </Col>
-                </Row>
-              )}
-            </>
+          {/* Related Products */}
+          {relatedProducts && relatedProducts.length > 0 && (
+            <Section title="Relaterade produkter" className="mt-5">
+              <ProductCarousel 
+                products={relatedProducts}
+                onAddToCart={(p) => handleAddToCart(p)}
+              />
+            </Section>
           )}
         </Container>
-
-        {/* Related Products - Fixed to show horizontally */}
-        {popularProducts.length > 0 && (
-          <div style={{ background: '#f8f9fa', marginTop: '3rem' }}>
-            <Container fluid="xl">
-              <ProductCarousel
-                title="Populära produkter"
-                products={popularProducts}
-                onAddToCart={handleAddToCart}
-              />
-            </Container>
-          </div>
-        )}
       </main>
       
       <Footer />

@@ -1,72 +1,49 @@
-// src/hooks/useProduct.js
-import { useQuery } from "@tanstack/react-query";
-import { api } from "../services/api";
 import { useState, useEffect, useCallback } from 'react';
-import { productAPI } from '../services/api';
+import axios from 'axios';
 
+// Get API URL - Vite style
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-export function useProductBySlug(slug) {
-  return useQuery({
-    queryKey: ["product", "slug", slug],
-    enabled: !!slug,
-    queryFn: () => api.getProductBySlug(slug),
-    staleTime: 30_000,
-    retry: 2,
-  });
-}
+// Create axios instance
+const api = axios.create({
+  baseURL: `${API_BASE_URL}/api`,
+  timeout: 10000,
+  withCredentials: true
+});
 
-
-export const useProducts = (initialFilters = {}) => {
+export const useProducts = (filters = {}) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [pagination, setPagination] = useState({});
-  const [filters, setFilters] = useState(initialFilters);
 
-  const fetchProducts = useCallback(async (newFilters = {}) => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-
-      const mergedFilters = { ...filters, ...newFilters };
-      const response = await productAPI.getAll(mergedFilters);
       
-      setProducts(response.data.data.products);
-      setPagination(response.data.data.pagination);
-      setFilters(mergedFilters);
-
+      console.log('Fetching products from:', `${API_BASE_URL}/api/products`);
+      const response = await api.get('/products', { params: filters });
+      console.log('Products response:', response.data);
+      
+      setProducts(response.data.data.products || []);
+      
     } catch (err) {
       setError(err.message);
       console.error('Error fetching products:', err);
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [JSON.stringify(filters)]);
 
-  // Initial fetch
   useEffect(() => {
     fetchProducts();
-  }, []);
-
-  const updateFilters = useCallback((newFilters) => {
-    fetchProducts(newFilters);
   }, [fetchProducts]);
-
-  const loadMore = useCallback(() => {
-    if (pagination.hasNext) {
-      fetchProducts({ ...filters, page: pagination.page + 1 });
-    }
-  }, [fetchProducts, filters, pagination]);
 
   return {
     products,
     loading,
     error,
-    pagination,
-    filters,
-    updateFilters,
-    loadMore,
-    refetch: () => fetchProducts(filters)
+    refetch: fetchProducts
   };
 };
 
@@ -82,10 +59,13 @@ export const useProduct = (slug) => {
       try {
         setLoading(true);
         setError(null);
-
-        const response = await productAPI.getById(slug);
+        
+        console.log('Fetching product:', slug);
+        const response = await api.get(`/products/${slug}`);
+        console.log('Product response:', response.data);
+        
         setProduct(response.data.data.product);
-
+        
       } catch (err) {
         setError(err.message);
         console.error('Error fetching product:', err);
@@ -98,33 +78,4 @@ export const useProduct = (slug) => {
   }, [slug]);
 
   return { product, loading, error };
-};
-
-export const useProductSearch = () => {
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const search = useCallback(async (query, filters = {}) => {
-    if (!query?.trim()) {
-      setResults([]);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await productAPI.search({ q: query, ...filters });
-      setResults(response.data.data);
-
-    } catch (err) {
-      setError(err.message);
-      console.error('Search error:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  return { results, loading, error, search };
 };

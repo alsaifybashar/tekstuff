@@ -10,16 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.2",
     "axios": "^1.12.1",
     "bootstrap": "^5.3.7",
     "bootstrap-icons": "^1.13.1",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.539.0",
     "prop-types": "^15.8.1",
-    "react": "^19.1.0",
+    "react": "^18.2.0",
     "react-bootstrap": "^2.10.10",
     "react-bootstrap-range-slider": "^3.0.8",
-    "react-dom": "^19.1.0",
+    "react-dom": "^18.2.0",
     "react-helmet-async": "^2.0.5",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.7.1"

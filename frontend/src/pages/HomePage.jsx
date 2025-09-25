@@ -1,55 +1,45 @@
 import React from 'react';
-import { ShoppingCart } from 'lucide-react';
+import { useProducts } from '../hooks/useProducts';
 
-// Layout Components
+// Your existing components
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer/Footer';
 import CategoryStrip from '../components/CategoryStrip';
-
-// Reusable Components
 import Hero from '../components/Layout/Hero/Hero';
 import ProductCarousel from '../components/Product/ProductCarousel/ProductCarousel';
-import Newsletter from '../components/Form/Newsletter/Newsletter';
-import Section from '../components/Layout/Section/Section';
 
-// Context and Data
 import { useCart } from '../context/CartContext';
-import allProducts from '../data/products.js';
-
 import './HomePage.css';
 
 export default function HomePage() {
   const cart = useCart();
+  
+  // Use live backend data instead of allProducts import
+  const { products: allProducts, loading } = useProducts({ limit: 20 });
+  
+  // Process products like before
+  const featuredDeals = allProducts?.filter(p => p.oldPrice) || [];
+  const popularProducts = allProducts?.filter(p => !p.oldPrice) || [];
 
-  // Process your existing products
-  const featuredDeals = allProducts?.filter(p => p.isDeal || p.oldPrice) || [];
-  const popularProducts = allProducts?.filter(p => !p.isDeal) || [];
-
-  // Event handlers
   const handleAddToCart = (product) => {
     if (product && product.id && product.inStock) {
       if (cart.add) {
         cart.add(product.id, 1);
         console.log('Added to cart:', product.id);
-      } else {
-        console.warn('Cart add function not available');
       }
-    } else {
-      console.warn('Cannot add to cart: invalid product or out of stock', product);
     }
   };
 
-  const handleExploreProducts = () => {
-    console.log('Navigate to products');
-  };
-
-  const handleViewOffers = () => {
-    console.log('Navigate to offers');
-  };
-
-  const handleNewsletterSignup = (email) => {
-    console.log('Newsletter signup:', email);
-  };
+  // Show loading while fetching data
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center min-vh-100">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -57,10 +47,8 @@ export default function HomePage() {
       
       <main className="flex-grow-1">
         <div className="refined-homepage">
-          {/* Category Strip */}
           <CategoryStrip onSelect={(id) => console.log("Selected:", id)} />
 
-          {/* Hero Section */}
           <Hero
             title={
               <>
@@ -68,67 +56,41 @@ export default function HomePage() {
                 <span className="hero-highlight"> moderna livet</span>
               </>
             }
-            description="Upptäck vårt noggrant utvalda sortiment av laddare, kablar och tillbehör från världens mest förtrodda märken."
-            primaryCTA={{
-              text: "Utforska produkter",
-              icon: <ShoppingCart size={18} />,
-              onClick: handleExploreProducts
-            }}
-            secondaryCTA={{
-              text: "Se erbjudanden",
-              onClick: handleViewOffers
-            }}
-            image={{
-              src: "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=600&h=400&fit=crop",
-              alt: "Premium elektronik"
-            }}
+            description="Upptäck vårt sortiment av laddare, kablar och tillbehör."
           />
 
-          {/* Featured Deals */}
+          {/* Show deals if available */}
           {featuredDeals.length > 0 && (
-            <Section>
-              <ProductCarousel
-                title="Super Deals"
+            <section>
+              <h2>Dagens deals</h2>
+              <ProductCarousel 
                 products={featuredDeals}
-                featured={true}
                 onAddToCart={handleAddToCart}
               />
-            </Section>
+            </section>
           )}
 
-          {/* Featured Deals */}
-          {featuredDeals.length > 0 && (
-            <Section>
-              <ProductCarousel
-                title="Super Deals"
-                products={featuredDeals}
-                featured={true}
-                onAddToCart={handleAddToCart}
-              />
-            </Section>
-          )}
-
-          
-          {/* Popular Products */}
+          {/* Show popular products */}
           {popularProducts.length > 0 && (
-            <Section>
-              <ProductCarousel
-                title="Populära produkter"
+            <section>
+              <h2>Populära produkter</h2>
+              <ProductCarousel 
                 products={popularProducts}
                 onAddToCart={handleAddToCart}
               />
-            </Section>
+            </section>
           )}
-
-          {/* Newsletter */}
-          <Newsletter
-            title="Håll dig uppdaterad"
-            description="Få de senaste erbjudandena och produktnyheterna direkt i din inkorg"
-            onSignup={handleNewsletterSignup}
-          />
+          
+          {/* Show message if no products */}
+          {allProducts.length === 0 && (
+            <div className="text-center py-5">
+              <h3>No products available</h3>
+              <p>Backend is connected but no products found.</p>
+            </div>
+          )}
         </div>
       </main>
-
+      
       <Footer />
     </div>
   );

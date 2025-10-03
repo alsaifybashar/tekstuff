@@ -1,28 +1,38 @@
 {
-  "name": "my-shop",
-  "version": "0.1.0",
-  "private": true,
   "scripts": {
+    "dev": "concurrently npm:dev:*",
     "dev:server": "ts-node ./src/index.ts",
     "dev:worker": "ts-node ./src/index-worker.ts",
-    "dev": "concurrently npm:dev:*",
     "build": "tsc",
-    "start:server": "node ./dist/index.js",
-    "start:worker": "node ./dist/index-worker.js",
-    "start": "concurrently npm:start:*"
+    "start": "concurrently npm:start:*",
+    "start:server": "node dist/index.js",
+    "start:worker": "node dist/index-worker.js",
+    "migration:generate": "vendure migrate create",
+    "migration:run": "vendure migrate up",
+    "migration:revert": "vendure migrate down"
   },
   "dependencies": {
-    "@vendure/admin-ui-plugin": "3.4.2",
-    "@vendure/asset-server-plugin": "3.4.2",
-    "@vendure/core": "3.4.2",
-    "@vendure/email-plugin": "3.4.2",
-    "@vendure/graphiql-plugin": "3.4.2",
-    "better-sqlite3": "12.4.1",
-    "dotenv": "17.2.3"
+    "@vendure/admin-ui-plugin": "^3.4.3",
+    "@vendure/asset-server-plugin": "^3.4.3",
+    "@vendure/core": "^3.4.3",
+    "@vendure/elasticsearch-plugin": "^3.4.3",
+    "@vendure/email-plugin": "^3.4.3",
+    "@vendure/payments-plugin": "^3.4.3",
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.4.1",
+    "graphql-tag": "^2.12.6",
+    "helmet": "^8.1.0",
+    "hpp": "^0.2.3",
+    "ioredis": "^5.8.0",
+    "rate-limiter-flexible": "^8.0.1",
+    "speakeasy": "^2.0.0"
   },
   "devDependencies": {
-    "@vendure/cli": "3.4.2",
-    "concurrently": "9.2.1",
-    "typescript": "5.8.2"
+    "@types/bcrypt": "^6.0.0",
+    "@types/node": "^24.6.2",
+    "@vendure/cli": "^3.4.3",
+    "concurrently": "^9.2.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

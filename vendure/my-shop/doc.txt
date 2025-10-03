@@ -1,0 +1,1480 @@
+Complete Vendure Backend Documentation
+Electronics Webshop API & Backend Guide
+
+🚀 Quick Fix for Current Issue
+Your server is running but needs a database migration for the custom fields:
+bash# Generate migration for custom fields
+npx vendure migrate create --name=add-custom-fields
+
+# Run the migration
+npx vendure migrate up
+
+# Restart the server
+npm run dev
+
+📋 Table of Contents
+
+Architecture Overview
+Authentication & Security
+API Endpoints
+GraphQL Operations
+B2B Features
+Admin Operations
+Testing & Examples
+
+
+🏗️ Architecture Overview
+Technology Stack
+
+Framework: Vendure (NestJS-based e-commerce framework)
+Database: SQLite (dev) / PostgreSQL (production)
+API: GraphQL
+Authentication: JWT + Session-based
+Real-time: WebSocket subscriptions
+File Storage: Local filesystem / S3 compatible
+
+Server URLs
+
+Shop API: http://localhost:3000/shop-api - Customer-facing API
+Admin API: http://localhost:3000/admin-api - Admin operations
+Admin UI: http://localhost:3002/admin - Web-based admin panel
+Assets: http://localhost:3000/assets - Product images
+Dev Mailbox: http://localhost:3000/mailbox - Email testing
+
+
+🔐 Authentication & Security
+Customer Authentication
+Register New Customer
+graphqlmutation RegisterCustomer {
+  registerCustomerAccount(input: {
+    emailAddress: "customer@example.com"
+    password: "SecurePass123!"
+    firstName: "John"
+    lastName: "Doe"
+    phoneNumber: "+1234567890"
+    title: "Mr"
+  }) {
+    ... on Success {
+      success
+    }
+    ... on MissingPasswordError {
+      errorCode
+      message
+    }
+    ... on PasswordValidationError {
+      errorCode
+      message
+      validationErrorMessage
+    }
+    ... on NativeAuthStrategyError {
+      errorCode
+      message
+    }
+  }
+}
+Login
+graphqlmutation Login {
+  login(username: "customer@example.com", password: "SecurePass123!") {
+    ... on CurrentUser {
+      id
+      identifier
+      channels {
+        id
+        code
+        token
+        permissions
+      }
+    }
+    ... on InvalidCredentialsError {
+      errorCode
+      message
+    }
+    ... on NotVerifiedError {
+      errorCode
+      message
+    }
+  }
+}
+Logout
+graphqlmutation Logout {
+  logout {
+    success
+  }
+}
+Admin Authentication
+Admin Login
+graphqlmutation AdminLogin {
+  login(username: "admin@example.com", password: "superadmin123") {
+    ... on CurrentUser {
+      id
+      identifier
+      channels {
+        id
+        code
+        token
+        permissions
+      }
+    }
+    ... on InvalidCredentialsError {
+      errorCode
+      message
+    }
+  }
+}
+Headers for Authenticated Requests
+javascript// Using Bearer Token
+{
+  "Authorization": "Bearer YOUR_JWT_TOKEN"
+}
+
+// Or use session cookies (automatically set after login)
+
+🛍️ Shop API Endpoints
+1. Products & Catalog
+Get All Products
+graphqlquery GetProducts {
+  products(options: {
+    take: 20
+    skip: 0
+    sort: {
+      name: ASC
+    }
+    filter: {
+      enabled: {
+        eq: true
+      }
+    }
+  }) {
+    items {
+      id
+      name
+      slug
+      description
+      featuredAsset {
+        id
+        preview
+        source
+      }
+      customFields {
+        technicalSpecs
+        warrantyInfo
+        manufacturer
+        modelNumber
+        compatibility
+        certifications
+      }
+      variants {
+        id
+        name
+        sku
+        price
+        currencyCode
+        stockLevel
+        customFields {
+          color
+          voltage
+          cableLength
+          connectorType
+          powerRating
+        }
+      }
+      facetValues {
+        id
+        name
+        code
+        facet {
+          id
+          name
+          code
+        }
+      }
+    }
+    totalItems
+  }
+}
+Get Single Product
+graphqlquery GetProduct {
+  product(slug: "usb-c-cable-2m") {
+    id
+    name
+    slug
+    description
+    featuredAsset {
+      id
+      preview
+      source
+    }
+    assets {
+      id
+      preview
+      source
+      type
+      name
+    }
+    customFields {
+      technicalSpecs
+      warrantyInfo
+      manufacturer
+      modelNumber
+      compatibility
+    }
+    variants {
+      id
+      name
+      sku
+      price
+      currencyCode
+      stockLevel
+      options {
+        id
+        name
+        code
+        group {
+          id
+          name
+          code
+        }
+      }
+      customFields {
+        color
+        voltage
+        cableLength
+      }
+    }
+  }
+}
+Search Products
+graphqlquery SearchProducts {
+  search(input: {
+    term: "cable"
+    take: 10
+    skip: 0
+    groupByProduct: true
+    sort: {
+      price: ASC
+    }
+    priceRange: {
+      min: 500  # Price in cents
+      max: 5000
+    }
+    facetValueFilters: [
+      {
+        and: "category:cables"
+      }
+      {
+        or: ["brand:apple", "brand:samsung"]
+      }
+    ]
+  }) {
+    items {
+      productId
+      productName
+      slug
+      productAsset {
+        id
+        preview
+      }
+      priceWithTax {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
+        }
+      }
+      score
+      customFields
+    }
+    totalItems
+    facetValues {
+      facetValue {
+        id
+        name
+        facet {
+          id
+          name
+        }
+      }
+      count
+    }
+  }
+}
+Get Collections (Categories)
+graphqlquery GetCollections {
+  collections(options: {
+    topLevelOnly: true
+  }) {
+    items {
+      id
+      name
+      slug
+      description
+      featuredAsset {
+        preview
+      }
+      customFields {
+        featured
+        icon
+      }
+      children {
+        id
+        name
+        slug
+      }
+      productVariants {
+        totalItems
+      }
+    }
+  }
+}
+2. Cart Operations
+Get Active Order (Cart)
+graphqlquery GetActiveOrder {
+  activeOrder {
+    id
+    code
+    state
+    total
+    totalWithTax
+    currencyCode
+    lines {
+      id
+      productVariant {
+        id
+        name
+        sku
+        price
+        customFields {
+          color
+          voltage
+        }
+      }
+      featuredAsset {
+        preview
+      }
+      unitPrice
+      unitPriceWithTax
+      quantity
+      totalPrice
+      totalPriceWithTax
+    }
+    shippingAddress {
+      fullName
+      streetLine1
+      streetLine2
+      city
+      postalCode
+      country
+      phoneNumber
+    }
+    shippingLines {
+      shippingMethod {
+        id
+        name
+        description
+      }
+      price
+      priceWithTax
+    }
+    subTotal
+    subTotalWithTax
+    shipping
+    shippingWithTax
+    promotions {
+      id
+      couponCode
+      name
+      description
+    }
+    discounts {
+      description
+      amountWithTax
+    }
+  }
+}
+Add to Cart
+graphqlmutation AddToCart {
+  addItemToOrder(productVariantId: "1", quantity: 2) {
+    ... on Order {
+      id
+      code
+      total
+      totalWithTax
+      lines {
+        id
+        productVariant {
+          id
+          name
+          sku
+        }
+        quantity
+        unitPrice
+        totalPrice
+      }
+    }
+    ... on OrderModificationError {
+      errorCode
+      message
+    }
+    ... on OrderLimitError {
+      errorCode
+      message
+      maxItems
+    }
+    ... on NegativeQuantityError {
+      errorCode
+      message
+    }
+    ... on InsufficientStockError {
+      errorCode
+      message
+      quantityAvailable
+    }
+  }
+}
+Update Cart Item Quantity
+graphqlmutation UpdateCartItem {
+  adjustOrderLine(orderLineId: "1", quantity: 3) {
+    ... on Order {
+      id
+      total
+      lines {
+        id
+        quantity
+        totalPrice
+      }
+    }
+    ... on OrderModificationError {
+      errorCode
+      message
+    }
+  }
+}
+Remove from Cart
+graphqlmutation RemoveFromCart {
+  removeOrderLine(orderLineId: "1") {
+    ... on Order {
+      id
+      total
+      lines {
+        id
+      }
+    }
+    ... on OrderModificationError {
+      errorCode
+      message
+    }
+  }
+}
+Apply Coupon
+graphqlmutation ApplyCoupon {
+  applyCouponCode(couponCode: "SAVE10") {
+    ... on Order {
+      id
+      total
+      promotions {
+        id
+        couponCode
+        name
+        description
+      }
+      discounts {
+        description
+        amountWithTax
+      }
+    }
+    ... on CouponCodeInvalidError {
+      errorCode
+      message
+      couponCode
+    }
+    ... on CouponCodeExpiredError {
+      errorCode
+      message
+      couponCode
+    }
+    ... on CouponCodeLimitError {
+      errorCode
+      message
+      couponCode
+      limit
+    }
+  }
+}
+3. Checkout Process
+Set Shipping Address
+graphqlmutation SetShippingAddress {
+  setOrderShippingAddress(input: {
+    fullName: "John Doe"
+    company: "Tech Solutions Inc"
+    streetLine1: "123 Main Street"
+    streetLine2: "Suite 100"
+    city: "Stockholm"
+    province: "Stockholm"
+    postalCode: "11122"
+    countryCode: "SE"
+    phoneNumber: "+46701234567"
+    customFields: {
+      deliveryInstructions: "Leave at reception"
+    }
+  }) {
+    ... on Order {
+      id
+      shippingAddress {
+        fullName
+        streetLine1
+        city
+        postalCode
+        country
+      }
+    }
+    ... on NoActiveOrderError {
+      errorCode
+      message
+    }
+  }
+}
+Get Shipping Methods
+graphqlquery GetShippingMethods {
+  eligibleShippingMethods {
+    id
+    name
+    description
+    price
+    priceWithTax
+    metadata
+  }
+}
+Set Shipping Method
+graphqlmutation SetShippingMethod {
+  setOrderShippingMethod(shippingMethodId: ["1"]) {
+    ... on Order {
+      id
+      shipping
+      shippingWithTax
+      shippingLines {
+        shippingMethod {
+          id
+          name
+        }
+        price
+        priceWithTax
+      }
+    }
+    ... on OrderModificationError {
+      errorCode
+      message
+    }
+    ... on NoActiveOrderError {
+      errorCode
+      message
+    }
+  }
+}
+Get Payment Methods
+graphqlquery GetPaymentMethods {
+  eligiblePaymentMethods {
+    id
+    code
+    name
+    description
+    isEligible
+    eligibilityMessage
+  }
+}
+Add Payment and Complete Order
+graphqlmutation AddPayment {
+  addPaymentToOrder(input: {
+    method: "stripe"
+    metadata: {
+      stripePaymentIntentId: "pi_1234567890"
+    }
+  }) {
+    ... on Order {
+      id
+      code
+      state
+      total
+      customer {
+        id
+        emailAddress
+      }
+    }
+    ... on PaymentFailedError {
+      errorCode
+      message
+      paymentErrorMessage
+    }
+    ... on PaymentDeclinedError {
+      errorCode
+      message
+      paymentErrorMessage
+    }
+    ... on OrderStateTransitionError {
+      errorCode
+      message
+      transitionError
+      fromState
+      toState
+    }
+    ... on NoActiveOrderError {
+      errorCode
+      message
+    }
+  }
+}
+4. Customer Account
+Get Customer Details
+graphqlquery GetCustomerDetails {
+  activeCustomer {
+    id
+    title
+    firstName
+    lastName
+    emailAddress
+    phoneNumber
+    addresses {
+      id
+      fullName
+      company
+      streetLine1
+      streetLine2
+      city
+      province
+      postalCode
+      country {
+        id
+        code
+        name
+      }
+      phoneNumber
+      defaultShippingAddress
+      defaultBillingAddress
+    }
+    orders(options: {
+      take: 10
+      sort: {
+        createdAt: DESC
+      }
+    }) {
+      items {
+        id
+        code
+        state
+        total
+        createdAt
+        lines {
+          productVariant {
+            name
+            sku
+          }
+          quantity
+        }
+      }
+      totalItems
+    }
+    customFields {
+      isB2B
+      companyName
+      taxId
+      newsletterSubscribed
+    }
+  }
+}
+Update Customer Details
+graphqlmutation UpdateCustomer {
+  updateCustomer(input: {
+    firstName: "John"
+    lastName: "Smith"
+    phoneNumber: "+46701234567"
+    customFields: {
+      newsletterSubscribed: true
+    }
+  }) {
+    ... on Customer {
+      id
+      firstName
+      lastName
+      phoneNumber
+    }
+  }
+}
+Create Customer Address
+graphqlmutation CreateAddress {
+  createCustomerAddress(input: {
+    fullName: "John Doe"
+    company: "Tech Company"
+    streetLine1: "123 Tech Street"
+    city: "Stockholm"
+    province: "Stockholm"
+    postalCode: "11122"
+    countryCode: "SE"
+    phoneNumber: "+46701234567"
+    defaultShippingAddress: true
+    defaultBillingAddress: true
+  }) {
+    id
+    fullName
+    streetLine1
+    city
+    defaultShippingAddress
+    defaultBillingAddress
+  }
+}
+Get Order History
+graphqlquery GetOrderHistory {
+  activeCustomer {
+    orders(options: {
+      take: 20
+      skip: 0
+      sort: {
+        createdAt: DESC
+      }
+      filter: {
+        state: {
+          notIn: ["AddingItems", "ArrangingPayment"]
+        }
+      }
+    }) {
+      items {
+        id
+        code
+        state
+        total
+        createdAt
+        updatedAt
+        orderPlacedAt
+        lines {
+          id
+          productVariant {
+            id
+            name
+            sku
+            product {
+              slug
+            }
+          }
+          featuredAsset {
+            preview
+          }
+          quantity
+          unitPrice
+          totalPrice
+        }
+        shippingAddress {
+          fullName
+          streetLine1
+          city
+          postalCode
+        }
+        customFields {
+          trackingNumber
+          deliveryInstructions
+        }
+      }
+      totalItems
+    }
+  }
+}
+
+🏢 B2B Features
+Create Company Account
+graphqlmutation CreateB2BAccount {
+  createCompanyAccount(input: {
+    name: "Tech Solutions AB"
+    taxId: "SE556677889901"
+    contactEmail: "purchasing@techsolutions.se"
+    contactPhone: "+46701234567"
+  }) {
+    id
+    name
+    taxId
+    creditLimit
+    paymentTerms
+    status
+    discountTier
+  }
+}
+Get Bulk Pricing
+graphqlquery GetBulkPricing {
+  calculateBulkPrice(
+    productVariantId: "1"
+    quantity: 500
+  ) {
+    unitPrice
+    totalPrice
+    discountPercent
+    discountAmount
+  }
+}
+Request Quote
+graphqlmutation RequestQuote {
+  requestQuote(input: {
+    items: [
+      {
+        productVariantId: "1"
+        quantity: 1000
+      },
+      {
+        productVariantId: "2"
+        quantity: 500
+      }
+    ]
+    notes: "Need delivery by end of month. Please include volume discount."
+  }) {
+    id
+    status
+    validUntil
+    totalAmount
+    items {
+      productVariantId
+      quantity
+      unitPrice
+      totalPrice
+    }
+  }
+}
+Get My Company Account
+graphqlquery GetMyCompanyAccount {
+  myCompanyAccount {
+    id
+    name
+    taxId
+    creditLimit
+    currentCredit
+    paymentTerms
+    discountTier
+    approvalRequired
+    status
+  }
+}
+Get Quote History
+graphqlquery GetQuoteHistory {
+  myQuoteRequests {
+    id
+    status
+    validUntil
+    totalAmount
+    createdAt
+    items {
+      productVariantId
+      quantity
+      unitPrice
+      totalPrice
+    }
+  }
+}
+
+👨‍💼 Admin API Operations
+Product Management
+Create Product
+graphqlmutation CreateProduct {
+  createProduct(input: {
+    translations: [{
+      languageCode: en
+      name: "USB-C Fast Charging Cable"
+      slug: "usb-c-fast-charging-cable"
+      description: "Premium USB-C cable with fast charging support"
+    }]
+    facetValueIds: ["1", "2"]
+    customFields: {
+      technicalSpecs: "{\"length\": \"2m\", \"maxPower\": \"100W\", \"dataTransfer\": \"10Gbps\"}"
+      warrantyInfo: "2 years manufacturer warranty"
+      manufacturer: "TechCables Inc"
+      modelNumber: "TC-USBC-2M-100W"
+      compatibility: "All USB-C devices"
+    }
+  }) {
+    id
+    name
+    slug
+  }
+}
+Create Product Variant
+graphqlmutation CreateProductVariant {
+  createProductVariant(input: [{
+    productId: "1"
+    translations: [{
+      languageCode: en
+      name: "2m Black"
+    }]
+    sku: "USBC-2M-BLK"
+    price: 2999
+    taxCategoryId: "1"
+    trackInventory: INHERIT
+    stockOnHand: 100
+    customFields: {
+      color: "black"
+      voltage: "20V"
+      cableLength: 2.0
+      connectorType: "usb-c"
+      powerRating: 100
+    }
+  }]) {
+    id
+    name
+    sku
+    price
+    stockLevel
+  }
+}
+Update Stock
+graphqlmutation UpdateStock {
+  updateProductVariants(input: [{
+    id: "1"
+    stockOnHand: 150
+    trackInventory: TRUE
+    outOfStockThreshold: 10
+    useGlobalOutOfStockThreshold: false
+  }]) {
+    id
+    stockLevel
+    stockOnHand
+    stockAllocated
+    outOfStockThreshold
+  }
+}
+Order Management
+Get Orders
+graphqlquery GetOrders {
+  orders(options: {
+    take: 20
+    skip: 0
+    sort: {
+      createdAt: DESC
+    }
+    filter: {
+      state: {
+        in: ["PaymentSettled", "Shipped", "Delivered"]
+      }
+    }
+  }) {
+    items {
+      id
+      code
+      state
+      total
+      customer {
+        emailAddress
+        firstName
+        lastName
+      }
+      lines {
+        productVariant {
+          name
+          sku
+        }
+        quantity
+        totalPrice
+      }
+      shippingAddress {
+        fullName
+        streetLine1
+        city
+      }
+      payments {
+        amount
+        state
+        method
+      }
+      customFields {
+        trackingNumber
+        internalNotes
+        purchaseOrderNumber
+      }
+    }
+    totalItems
+  }
+}
+Update Order State
+graphqlmutation FulfillOrder {
+  transitionFulfillmentToState(
+    id: "1"
+    state: "Shipped"
+  ) {
+    ... on Fulfillment {
+      id
+      state
+      trackingCode
+      method
+    }
+    ... on FulfillmentStateTransitionError {
+      errorCode
+      message
+      transitionError
+    }
+  }
+}
+Add Tracking Number
+graphqlmutation AddTrackingNumber {
+  updateOrder(input: {
+    id: "1"
+    customFields: {
+      trackingNumber: "SE123456789"
+    }
+  }) {
+    id
+    customFields {
+      trackingNumber
+    }
+  }
+}
+Customer Management
+Get Customers
+graphqlquery GetCustomers {
+  customers(options: {
+    take: 20
+    filter: {
+      emailAddress: {
+        contains: "@company.com"
+      }
+    }
+  }) {
+    items {
+      id
+      title
+      firstName
+      lastName
+      emailAddress
+      customFields {
+        isB2B
+        companyName
+        taxId
+      }
+      orders {
+        totalItems
+      }
+    }
+    totalItems
+  }
+}
+Approve B2B Account
+graphqlmutation ApproveB2BCustomer {
+  updateCustomer(input: {
+    id: "1"
+    customFields: {
+      isB2B: true
+    }
+  }) {
+    id
+    customFields {
+      isB2B
+    }
+  }
+}
+
+🧪 Testing & Development
+GraphQL Playground
+Access the GraphQL playground at:
+
+Shop API: http://localhost:3000/shop-api
+Admin API: http://localhost:3000/admin-api
+
+cURL Examples
+Shop API Request
+bash# Get products
+curl -X POST http://localhost:3000/shop-api \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query { products(options: { take: 5 }) { items { id name slug price } totalItems } }"
+  }'
+
+# Login
+curl -X POST http://localhost:3000/shop-api \
+  -H "Content-Type: application/json" \
+  -c cookies.txt \
+  -d '{
+    "query": "mutation { login(username: \"customer@example.com\", password: \"password\") { ... on CurrentUser { id identifier } } }"
+  }'
+
+# Add to cart (with session)
+curl -X POST http://localhost:3000/shop-api \
+  -H "Content-Type: application/json" \
+  -b cookies.txt \
+  -d '{
+    "query": "mutation { addItemToOrder(productVariantId: \"1\", quantity: 2) { ... on Order { id total lines { quantity } } } }"
+  }'
+Admin API Request
+bash# Admin login
+curl -X POST http://localhost:3000/admin-api \
+  -H "Content-Type: application/json" \
+  -c admin-cookies.txt \
+  -d '{
+    "query": "mutation { login(username: \"admin@example.com\", password: \"superadmin123\") { ... on CurrentUser { id } } }"
+  }'
+
+# Create product
+curl -X POST http://localhost:3000/admin-api \
+  -H "Content-Type: application/json" \
+  -b admin-cookies.txt \
+  -d '{
+    "query": "mutation { createProduct(input: { translations: [{ languageCode: en, name: \"Test Product\", slug: \"test-product\" }] }) { id name } }"
+  }'
+JavaScript/TypeScript Client Example
+typescript// shop-api-client.ts
+import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
+
+const client = new ApolloClient({
+  uri: 'http://localhost:3000/shop-api',
+  cache: new InMemoryCache(),
+  credentials: 'include', // Include cookies
+});
+
+// Get products
+async function getProducts() {
+  const { data } = await client.query({
+    query: gql`
+      query GetProducts {
+        products(options: { take: 10 }) {
+          items {
+            id
+            name
+            slug
+            variants {
+              id
+              price
+              customFields {
+                color
+                voltage
+              }
+            }
+          }
+          totalItems
+        }
+      }
+    `
+  });
+  return data.products;
+}
+
+// Add to cart
+async function addToCart(variantId: string, quantity: number) {
+  const { data } = await client.mutate({
+    mutation: gql`
+      mutation AddToCart($variantId: ID!, $quantity: Int!) {
+        addItemToOrder(productVariantId: $variantId, quantity: $quantity) {
+          ... on Order {
+            id
+            total
+            lines {
+              productVariant {
+                name
+              }
+              quantity
+            }
+          }
+          ... on InsufficientStockError {
+            errorCode
+            message
+            quantityAvailable
+          }
+        }
+      }
+    `,
+    variables: {
+      variantId,
+      quantity
+    }
+  });
+  return data.addItemToOrder;
+}
+
+// B2B: Get bulk pricing
+async function getBulkPricing(variantId: string, quantity: number) {
+  const { data } = await client.query({
+    query: gql`
+      query GetBulkPrice($variantId: ID!, $quantity: Int!) {
+        calculateBulkPrice(productVariantId: $variantId, quantity: $quantity) {
+          unitPrice
+          totalPrice
+          discountPercent
+          discountAmount
+        }
+      }
+    `,
+    variables: {
+      variantId,
+      quantity
+    }
+  });
+  return data.calculateBulkPrice;
+}
+
+// Usage
+async function main() {
+  // Get products
+  const products = await getProducts();
+  console.log('Products:', products);
+
+  // Add first variant to cart
+  if (products.items.length > 0 && products.items[0].variants.length > 0) {
+    const variantId = products.items[0].variants[0].id;
+    const cartResult = await addToCart(variantId, 2);
+    console.log('Cart:', cartResult);
+
+    // Check bulk pricing
+    const bulkPrice = await getBulkPricing(variantId, 100);
+    console.log('Bulk price for 100 units:', bulkPrice);
+  }
+}
+
+main().catch(console.error);
+React Integration Example
+tsx// ProductList.tsx
+import React, { useEffect, useState } from 'react';
+import { useQuery, useMutation } from '@apollo/client';
+import { GET_PRODUCTS, ADD_TO_CART } from './queries';
+
+function ProductList() {
+  const { loading, error, data } = useQuery(GET_PRODUCTS, {
+    variables: { take: 20 }
+  });
+  
+  const [addToCart] = useMutation(ADD_TO_CART);
+  const [notification, setNotification] = useState('');
+
+  const handleAddToCart = async (variantId: string) => {
+    try {
+      const result = await addToCart({
+        variables: { variantId, quantity: 1 }
+      });
+      
+      if (result.data.addItemToOrder.__typename === 'Order') {
+        setNotification('Added to cart!');
+      } else {
+        setNotification('Error: ' + result.data.addItemToOrder.message);
+      }
+    } catch (err) {
+      setNotification('Error adding to cart');
+    }
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
+  return (
+    <div>
+      {notification && <div className="notification">{notification}</div>}
+      
+      <div className="product-grid">
+        {data.products.items.map((product: any) => (
+          <div key={product.id} className="product-card">
+            <img src={product.featuredAsset?.preview} alt={product.name} />
+            <h3>{product.name}</h3>
+            <p>{product.description}</p>
+            
+            {/* Custom fields for electronics */}
+            {product.customFields.manufacturer && (
+              <p>Brand: {product.customFields.manufacturer}</p>
+            )}
+            {product.customFields.warrantyInfo && (
+              <p>Warranty: {product.customFields.warrantyInfo}</p>
+            )}
+            
+            {product.variants.map((variant: any) => (
+              <div key={variant.id} className="variant">
+                <span>{variant.name}</span>
+                <span>${(variant.price / 100).toFixed(2)}</span>
+                
+                {/* Variant custom fields */}
+                {variant.customFields.color && (
+                  <span>Color: {variant.customFields.color}</span>
+                )}
+                {variant.customFields.cableLength && (
+                  <span>Length: {variant.customFields.cableLength}m</span>
+                )}
+                
+                <button onClick={() => handleAddToCart(variant.id)}>
+                  Add to Cart
+                </button>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+📊 Database Schema
+Custom Fields Added
+Product Custom Fields
+
+technicalSpecs (TEXT) - JSON formatted technical specifications
+warrantyInfo (STRING) - Warranty period and terms
+manufacturer (STRING) - Brand/Manufacturer name
+modelNumber (STRING) - Product model number
+compatibility (TEXT) - Compatible devices/systems
+certifications (STRING[]) - CE, FCC, RoHS certifications
+
+Product Variant Custom Fields
+
+color (STRING) - Product color
+voltage (STRING) - Operating voltage
+cableLength (FLOAT) - Cable length in meters
+connectorType (STRING) - Type of connector
+powerRating (FLOAT) - Power rating in watts
+
+Customer Custom Fields
+
+isB2B (BOOLEAN) - Business customer flag
+companyName (STRING) - Company name
+taxId (STRING) - Tax ID/VAT number
+preferredPaymentTerms (STRING) - NET30/60/90
+newsletterSubscribed (BOOLEAN) - Newsletter subscription
+
+Order Custom Fields
+
+internalNotes (TEXT) - Admin-only notes
+trackingNumber (STRING) - Shipment tracking
+deliveryInstructions (TEXT) - Delivery notes
+purchaseOrderNumber (STRING) - B2B PO number
+
+
+🔧 Configuration & Environment
+Required Environment Variables
+bash# Core Settings
+APP_ENV=dev|production
+PORT=3000
+SUPERADMIN_USERNAME=admin@yourshop.com
+SUPERADMIN_PASSWORD=secure_password
+COOKIE_SECRET=minimum-32-character-random-string
+
+# Database (Production)
+DB_TYPE=postgres
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=vendure_shop
+DB_USERNAME=vendure
+DB_PASSWORD=database_password
+
+# Email
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=app-specific-password
+SMTP_FROM=noreply@yourshop.com
+
+# URLs
+SHOP_URL=https://yourshop.com
+CORS_ORIGINS=https://yourfrontend.com,https://admin.yourshop.com
+
+# Redis (Optional)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=redis_password
+
+# Elasticsearch (Optional)
+ELASTICSEARCH_HOST=http://localhost:9200
+
+# Stripe (When ready)
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+File Structure
+my-shop/
+├── src/
+│   ├── plugins/
+│   │   ├── b2b/
+│   │   │   └── b2b.plugin.ts
+│   │   ├── product-enhancement/
+│   │   ├── security/
+│   │   └── cache/
+│   ├── migrations/
+│   ├── vendure-config.ts
+│   ├── index.ts
+│   └── index-worker.ts
+├── static/
+│   ├── assets/
+│   └── email/
+│       └── templates/
+├── docker-compose.yml
+├── package.json
+├── .env
+└── README.md
+
+🚀 Deployment Checklist
+
+Database Migration
+
+bash   npx vendure migrate create --name=production-setup
+   npx vendure migrate up
+
+Build for Production
+
+bash   npm run build
+
+Security Checklist
+
+ Change all default passwords
+ Set secure COOKIE_SECRET
+ Enable HTTPS
+ Configure CORS properly
+ Set up rate limiting
+ Enable email verification
+ Configure backup strategy
+
+
+Performance Optimization
+
+ Enable Redis caching
+ Set up Elasticsearch
+ Configure CDN for assets
+ Enable response compression
+ Set up monitoring (Sentry, New Relic)
+
+
+B2B Features Setup
+
+ Configure tax validation rules
+ Set up bulk pricing tiers
+ Define credit limits
+ Create approval workflows
+ Set up NET payment terms
+
+
+
+
+📚 Additional Resources
+
+Vendure Documentation: https://docs.vendure.io
+GraphQL Schema: Access at /shop-api or /admin-api when introspection is enabled
+Admin UI Guide: https://docs.vendure.io/user-guide/
+Plugin Development: https://docs.vendure.io/guides/extending/
+Deployment Guide: https://docs.vendure.io/guides/deployment/
+
+
+🆘 Troubleshooting
+Common Issues
+
+Database Schema Mismatch
+
+bash   npx vendure migrate create --name=fix-schema
+   npx vendure migrate up
+
+Port Already in Use
+
+bash   # Find process using port
+   lsof -i :3000
+   # Kill process
+   kill -9 PID
+
+Session Issues
+
+bash   # Clear sessions
+   npm run clear-cache
+   # Restart server
+   npm run dev
+
+Stock Synchronization
+
+graphql   mutation {
+     updateProductVariants(input: {
+       id: "1"
+       trackInventory: TRUE
+       stockOnHand: 100
+     }) {
+       stockLevel
+     }
+   }
+This documentation covers all aspects of your Vendure backend. The system is designed to be scalable, secure, and feature-rich for both B2C and B2B operations.

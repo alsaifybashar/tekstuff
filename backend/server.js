@@ -24,6 +24,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const instaboxRoutes = require('./routes/instaboxRoutes');
 
 const app = express();
 
@@ -182,6 +183,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/instabox', instaboxRoutes);
 
 // API documentation endpoint
 app.get('/api/docs', (req, res) => {

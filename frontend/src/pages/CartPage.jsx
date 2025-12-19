@@ -5,6 +5,7 @@ import { ArrowLeft, Minus, Plus, Trash2, Heart, ShoppingCart } from "lucide-reac
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer/Footer";
+import CheckoutSteps from "../components/CheckoutSteps";
 
 import { useCart } from "../context/CartContext";
 import allProducts from "../data/products.js";
@@ -19,11 +20,11 @@ export default function CartPage() {
   // Load product details
   useEffect(() => {
     let cancelled = false;
-    
+
     async function load() {
       setLoading(true);
       setErr(null);
-      
+
       try {
         const entries = Object.entries(items).filter(([, q]) => (Number(q) || 0) > 0);
         if (!entries.length) {
@@ -32,8 +33,8 @@ export default function CartPage() {
         }
 
         const productRows = entries.map(([productId, qty]) => {
-          let product = allProducts?.find(p => 
-            String(p.id) === String(productId) || 
+          let product = allProducts?.find(p =>
+            String(p.id) === String(productId) ||
             String(p.slug) === String(productId)
           );
 
@@ -59,7 +60,7 @@ export default function CartPage() {
         });
 
         if (!cancelled) setCartRows(productRows);
-        
+
       } catch (e) {
         if (!cancelled) setErr(e.message || "Något gick fel vid hämtning.");
       } finally {
@@ -83,15 +84,15 @@ export default function CartPage() {
     const deliveryCharges = subtotal > 500 ? 0 : 49;
     const gst = Math.round(subtotal * 0.18); // 18% GST
     const total = subtotal + deliveryCharges + gst;
-    
-    return { 
-      totalItems, 
-      totalMRP, 
-      discountAmount, 
-      subtotal, 
-      deliveryCharges, 
-      gst, 
-      total 
+
+    return {
+      totalItems,
+      totalMRP,
+      discountAmount,
+      subtotal,
+      deliveryCharges,
+      gst,
+      total
     };
   }, [cartRows]);
 
@@ -137,22 +138,7 @@ export default function CartPage() {
       <main className="flex-grow-1">
         <div className="refined-cart-container">
           {/* Progress Steps */}
-          <div className="progress-steps">
-            <div className="step active">
-              <div className="step-number">01</div>
-              <span className="step-label">Min kundvagn</span>
-            </div>
-            <div className="step-line"></div>
-            <div className="step">
-              <div className="step-number">02</div>
-              <span className="step-label">Leveransinfo</span>
-            </div>
-            <div className="step-line"></div>
-            <div className="step">
-              <div className="step-number">03</div>
-              <span className="step-label">Betalning</span>
-            </div>
-          </div>
+          <CheckoutSteps currentStep={1} />
 
           {/* Main Content */}
           <div className="cart-content">
@@ -173,24 +159,24 @@ export default function CartPage() {
                 {cartRows.map((item) => (
                   <div key={item.id} className="cart-item">
                     <div className="item-image">
-                      <img 
-                        src={item.image || item.images?.[0] || "/images/placeholder.png"} 
+                      <img
+                        src={item.image || item.images?.[0] || "/images/placeholder.png"}
                         alt={item.title || item.name}
                         onError={(e) => {
                           e.target.src = "/images/placeholder.png";
                         }}
                       />
                     </div>
-                    
+
                     <div className="item-details">
                       <h3 className="item-title">{item.title || item.name}</h3>
                       <p className="item-subtitle">{item.subtitle}</p>
-                      
+
                       <div className="item-controls">
                         <div className="quantity-wrapper">
                           <label>Quantity</label>
                           <div className="quantity-controls">
-                            <button 
+                            <button
                               className="qty-btn"
                               onClick={() => handleQuantityChange(item.id, item.qty - 1)}
                               disabled={loading}
@@ -198,7 +184,7 @@ export default function CartPage() {
                               <Minus size={16} />
                             </button>
                             <span className="qty-display">{item.qty.toString().padStart(2, '0')}</span>
-                            <button 
+                            <button
                               className="qty-btn"
                               onClick={() => handleQuantityChange(item.id, item.qty + 1)}
                               disabled={loading}
@@ -221,7 +207,7 @@ export default function CartPage() {
                       <button className="action-btn wishlist-btn">
                         <Heart size={18} />
                       </button>
-                      <button 
+                      <button
                         className="action-btn remove-btn"
                         onClick={() => remove(item.id)}
                         disabled={loading}
@@ -237,51 +223,51 @@ export default function CartPage() {
             {/* Right Column - Price Details */}
             <div className="price-section">
               <h2 className="price-title">Prisdetaljer</h2>
-              
+
               <div className="price-breakdown">
                 <div className="price-row">
                   <span>Totalt antal artiklar</span>
                   <span>{totals.totalItems}</span>
                 </div>
-                
+
                 <div className="price-row">
                   <span>Totalt MRP-värde</span>
                   <span>{formatPrice(totals.totalMRP)} kr</span>
                 </div>
-                
+
                 {totals.discountAmount > 0 && (
                   <div className="price-row discount">
                     <span>Rabatt på MRP</span>
                     <span className="discount-amount">{formatPrice(totals.discountAmount)} kr</span>
                   </div>
                 )}
-                
+
                 <div className="price-row">
                   <span>Delsumma</span>
                   <span>{formatPrice(totals.subtotal)} kr</span>
                 </div>
-                
+
                 <div className="price-row">
                   <span>Leveransavgifter</span>
                   <span className={totals.deliveryCharges === 0 ? 'free-delivery' : ''}>
                     {totals.deliveryCharges === 0 ? 'GRATIS' : `${formatPrice(totals.deliveryCharges)} kr`}
                   </span>
                 </div>
-                
+
                 <div className="price-row">
                   <span>Moms</span>
                   <span>{formatPrice(totals.gst)} kr</span>
                 </div>
-                
+
                 <div className="price-row total">
                   <span>Totalsumma</span>
                   <span>{formatPrice(totals.total)} kr</span>
                 </div>
               </div>
 
-              <button className="checkout-btn">
+              <Link to="/delivery" className="checkout-btn text-center text-decoration-none d-block">
                 Fortsätt till leverans
-              </button>
+              </Link>
 
               <div className="savings-note">
                 {totals.discountAmount > 0 && (

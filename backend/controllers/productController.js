@@ -533,14 +533,200 @@ const createProduct = async (req, res) => {
 
 // Additional enhanced methods...
 const updateProduct = async (req, res) => {
-  // Enhanced update logic with partial updates and better validation
-  // Similar structure to createProduct but with UPDATE query
-  // Implementation details...
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      description,
+      shortDescription,
+      sku,
+      price,
+      comparePrice,
+      costPrice,
+      stockQuantity,
+      lowStockThreshold,
+      weight,
+      dimensions,
+      categoryId,
+      isActive,
+      isFeatured,
+      metaTitle,
+      metaDescription,
+      tags
+    } = req.body;
+
+    // Check if product exists
+    const checkQuery = 'SELECT * FROM products WHERE id = $1';
+    const checkResult = await query(checkQuery, [id]);
+
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
+    const currentProduct = checkResult.rows[0];
+
+    // Build update query dynamically
+    const updates = [];
+    const values = [];
+    let paramCount = 0;
+
+    const fields = {
+      name, description, short_description: shortDescription, sku,
+      price, compare_price: comparePrice, cost_price: costPrice,
+      stock_quantity: stockQuantity, low_stock_threshold: lowStockThreshold,
+      weight, dimensions: dimensions ? JSON.stringify(dimensions) : undefined,
+      category_id: categoryId, is_active: isActive, is_featured: isFeatured,
+      meta_title: metaTitle, meta_description: metaDescription, tags
+    };
+
+    // Helper to add field if defined
+    Object.keys(fields).forEach(key => {
+      const val = fields[key];
+      if (val !== undefined) {
+        paramCount++;
+        updates.push(`${key} = $${paramCount}`);
+        values.push(val);
+      }
+    });
+
+    // Handle slug update if name changed
+    if (name && name !== currentProduct.name) {
+      const slug = slugify(name, { lower: true, strict: true, remove: /[*+~.()'"!:@]/g });
+      paramCount++;
+      updates.push(`slug = $${paramCount}`);
+      values.push(slug);
+    }
+
+    // Handle Image Updates
+    // req.body.existingImages should be an array of URLs to KEEP
+    // req.files are NEW images to ADD
+    let finalImages = currentProduct.images || [];
+
+    // 1. Filter existing images
+    if (req.body.existingImages) {
+      const keepImages = Array.isArray(req.body.existingImages)
+        ? req.body.existingImages
+        : [req.body.existingImages];
+
+      // Identify images to delete (those in current but not in keep list)
+      const imagesToDelete = finalImages.filter(img => !keepImages.includes(img));
+
+      // Delete removed images from filesystem (optional, good practice)
+      // for (const img of imagesToDelete) { deleteImage(img); }
+
+      finalImages = finalImages.filter(img => keepImages.includes(img));
+    } else if (req.body.clearImages === 'true') {
+      finalImages = [];
+    }
+
+    // 2. Add new images
+    if (req.files && req.files.length > 0) {
+      try {
+        const newImageUrls = await uploadMultipleImages(req.files, 'products');
+        finalImages = [...finalImages, ...newImageUrls];
+      } catch (uploadError) {
+        console.error('Image upload error:', uploadError);
+        // Continue with partial update or fail? Let's fail for data integrity.
+        return res.status(400).json({ success: false, message: 'Failed to upload new images' });
+      }
+    }
+
+    if (JSON.stringify(finalImages) !== JSON.stringify(currentProduct.images)) {
+      paramCount++;
+      updates.push(`images = $${paramCount}`);
+      values.push(JSON.stringify(finalImages));
+    }
+
+    if (updates.length > 0) {
+      // Add updated_at
+      paramCount++;
+      updates.push(`updated_at = $${paramCount}`);
+      values.push(new Date());
+
+      // Add ID to values
+      paramCount++;
+      values.push(id);
+
+      const updateQuery = `
+        UPDATE products 
+        SET ${updates.join(', ')}
+        WHERE id = $${paramCount}
+        RETURNING *
+      `;
+
+      const result = await query(updateQuery, values);
+
+      // Log audit
+      await logAuditEvent(
+        req.user?.id, 'product_updated', 'product', id, req.ip, req.get('user-agent')
+      );
+
+      return res.json({
+        success: true,
+        data: { product: result.rows[0] },
+        message: 'Product updated successfully'
+      });
+    } else {
+      return res.json({
+        success: true,
+        data: { product: currentProduct },
+        message: 'No changes detected'
+      });
+    }
+
+  } catch (error) {
+    console.error('Update product error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update product'
+    });
+  }
 };
 
 const deleteProduct = async (req, res) => {
-  // Enhanced deletion with image cleanup and audit logging
-  // Implementation details...
+  try {
+    const { id } = req.params;
+
+    // Check if exists
+    const checkResult = await query('SELECT * FROM products WHERE id = $1', [id]);
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    // Attempt delete
+    // Note: If foreign keys exist (e.g. order_items), this might fail or need cascade.
+    // Ideally we soft delete (is_active = false) but user asked for edit/manage.
+    // Let's implement soft delete as safer default, or hard delete if requested explicitly.
+    // For now, let's do a hard delete but wrap in try/catch for foreign key constraint.
+
+    try {
+      await query('DELETE FROM products WHERE id = $1', [id]);
+
+      // Log audit
+      await logAuditEvent(
+        req.user?.id, 'product_deleted', 'product', id, req.ip, req.get('user-agent')
+      );
+
+      res.json({ success: true, message: 'Product deleted successfully' });
+    } catch (dbError) {
+      if (dbError.code === '23503') { // Foreign key violation
+        // Fallback to soft delete
+        await query('UPDATE products SET is_active = FALSE WHERE id = $1', [id]);
+        return res.json({ success: true, message: 'Product archived (cannot delete due to existing orders)' });
+      }
+      throw dbError;
+    }
+
+  } catch (error) {
+    console.error('Delete product error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete product'
+    });
+  }
 };
 
 // Export all methods

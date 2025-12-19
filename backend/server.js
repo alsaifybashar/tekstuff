@@ -20,9 +20,10 @@ const userRoutes = require('./routes/userRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 
 // New enhanced routes
+// New enhanced routes
 const cartRoutes = require('./routes/cartRoutes');
 const searchRoutes = require('./routes/searchRoutes');
-// // const analyticsRoutes = require('./routes/analyticsRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 
@@ -180,7 +181,7 @@ app.use('/api/categories', categoryRoutes);
 // New enhanced routes
 app.use('/api/cart', cartRoutes);
 app.use('/api/search', searchRoutes);
-// // app.use('/api/analytics', analyticsRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // API documentation endpoint
 app.get('/api/docs', (req, res) => {

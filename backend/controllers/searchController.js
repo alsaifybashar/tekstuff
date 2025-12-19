@@ -165,44 +165,62 @@ const searchProducts = async (req, res) => {
 const getSearchSuggestions = async (req, res) => {
   try {
     const { q: searchQuery } = req.query;
-    
-    // Get product name suggestions
-    const productSuggestions = await query(`
-      SELECT DISTINCT name, slug
-      FROM products 
-      WHERE name ILIKE '%' || $1 || '%' 
-      AND is_active = TRUE
-      ORDER BY 
-        CASE WHEN name ILIKE $1 || '%' THEN 1 ELSE 2 END,
-        LENGTH(name)
-      LIMIT 8
-    `, [searchQuery]);
 
-    // Get category suggestions  
-    const categorySuggestions = await query(`
-      SELECT DISTINCT name, slug
-      FROM categories 
-      WHERE name ILIKE '%' || $1 || '%' 
-      AND is_active = TRUE
-      ORDER BY 
-        CASE WHEN name ILIKE $1 || '%' THEN 1 ELSE 2 END,
-        LENGTH(name)
-      LIMIT 5
-    `, [searchQuery]);
+    try {
+      // Get product name suggestions from DB
+      const productSuggestions = await query(`
+        SELECT DISTINCT name, slug
+        FROM products 
+        WHERE name ILIKE '%' || $1 || '%' 
+        AND is_active = TRUE
+        ORDER BY 
+          CASE WHEN name ILIKE $1 || '%' THEN 1 ELSE 2 END,
+          LENGTH(name)
+        LIMIT 8
+      `, [searchQuery]);
 
-    // Get popular search terms (you could track these in a separate table)
-    const suggestions = {
-      products: productSuggestions.rows,
-      categories: categorySuggestions.rows,
-      popular: [] // Could add popular search tracking
-    };
+      // Get category suggestions from DB 
+      const categorySuggestions = await query(`
+        SELECT DISTINCT name, slug
+        FROM categories 
+        WHERE name ILIKE '%' || $1 || '%' 
+        AND is_active = TRUE
+        ORDER BY 
+          CASE WHEN name ILIKE $1 || '%' THEN 1 ELSE 2 END,
+          LENGTH(name)
+        LIMIT 5
+      `, [searchQuery]);
 
-    res.set('Cache-Control', 'public, max-age=600'); // 10 minutes cache
-    
-    res.json({
-      success: true,
-      data: suggestions
-    });
+      res.json({
+        success: true,
+        data: {
+          products: productSuggestions.rows,
+          categories: categorySuggestions.rows,
+          popular: []
+        }
+      });
+    } catch (dbError) {
+      console.warn("Search suggestions DB failed, using mock data:", dbError.message);
+
+      const { mockProducts } = require('../utils/mockData');
+      const lowerQ = searchQuery.toLowerCase();
+
+      const matching = mockProducts.filter(p =>
+        p.name.toLowerCase().includes(lowerQ)
+      ).slice(0, 8);
+
+      res.json({
+        success: true,
+        data: {
+          products: matching.map(p => ({
+            name: p.name,
+            slug: p.slug || p.id
+          })),
+          categories: [],
+          popular: []
+        }
+      });
+    }
 
   } catch (error) {
     console.error('Get suggestions error:', error);

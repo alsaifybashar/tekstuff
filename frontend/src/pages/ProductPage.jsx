@@ -6,6 +6,7 @@ import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import Alert from "react-bootstrap/Alert";
 import Spinner from "react-bootstrap/Spinner";
+import DOMPurify from "dompurify";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer/Footer";
@@ -27,9 +28,9 @@ export default function ProductPage() {
 
   // Use backend data
   const { product, loading, error } = useProduct(slug);
-  const { products: relatedProducts } = useProducts({ 
-    category: product?.category?.slug, 
-    limit: 8 
+  const { products: relatedProducts } = useProducts({
+    category: product?.category?.slug,
+    limit: 8
   });
 
   const handleAddToCart = (product) => {
@@ -74,7 +75,7 @@ export default function ProductPage() {
   return (
     <div className="d-flex flex-column min-vh-100">
       <Navbar />
-      
+
       <main className="flex-grow-1">
         <Container className="py-4">
           {/* Breadcrumb */}
@@ -99,8 +100,8 @@ export default function ProductPage() {
           <Row>
             {/* Product Images */}
             <Col md={6}>
-              <ProductImageGallery 
-                images={product.images} 
+              <ProductImageGallery
+                images={product.images}
                 productName={product.name}
               />
             </Col>
@@ -109,14 +110,14 @@ export default function ProductPage() {
             <Col md={6}>
               <div className="product-info">
                 <h1 className="h2 mb-3">{product.name}</h1>
-                
+
                 {product.shortDescription && (
                   <p className="lead text-muted mb-4">
                     {product.shortDescription}
                   </p>
                 )}
 
-                <PriceBlock 
+                <PriceBlock
                   price={product.price}
                   oldPrice={product.oldPrice}
                   className="mb-4"
@@ -143,7 +144,7 @@ export default function ProductPage() {
                     max={product.stockQuantity}
                     disabled={!product.inStock}
                   />
-                  
+
                   <Button
                     variant="primary"
                     size="lg"
@@ -177,9 +178,9 @@ export default function ProductPage() {
             <Row className="mt-5">
               <Col>
                 <h3>Beskrivning</h3>
-                <div 
+                <div
                   className="product-description"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }}
                 />
               </Col>
             </Row>
@@ -188,7 +189,7 @@ export default function ProductPage() {
           {/* Related Products */}
           {relatedProducts && relatedProducts.length > 0 && (
             <Section title="Relaterade produkter" className="mt-5">
-              <ProductCarousel 
+              <ProductCarousel
                 products={relatedProducts}
                 onAddToCart={(p) => handleAddToCart(p)}
               />
@@ -196,7 +197,7 @@ export default function ProductPage() {
           )}
         </Container>
       </main>
-      
+
       <Footer />
     </div>
   );

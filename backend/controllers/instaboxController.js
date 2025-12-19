@@ -52,8 +52,23 @@ exports.checkAvailability = async (req, res) => {
             country_code = 'SE'
         } = req.body;
 
-        if (!zip_code) {
-            return res.status(400).json({ success: false, message: 'Zip code is required' });
+        // Security: Input Validation
+        if (!zip_code || typeof zip_code !== 'string') {
+            return res.status(400).json({ success: false, message: 'Invalid or missing zip code' });
+        }
+
+        // Sanitize Strings to prevent massive payloads or unexpected types
+        const cleanZip = zip_code.trim().substring(0, 10); // Max 10 chars
+        if (cleanZip.length < 3) {
+            return res.status(400).json({ success: false, message: 'Zip code too short' });
+        }
+
+        // Optional fields validation
+        if (street && (typeof street !== 'string' || street.length > 200)) {
+            return res.status(400).json({ success: false, message: 'Invalid street address' });
+        }
+        if (city && (typeof city !== 'string' || city.length > 100)) {
+            return res.status(400).json({ success: false, message: 'Invalid city' });
         }
 
         // Mock response if no credentials (to prevent app breaking during dev without keys)

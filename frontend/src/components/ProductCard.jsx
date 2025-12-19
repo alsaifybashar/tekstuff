@@ -1,8 +1,9 @@
 import React from 'react';
 import { Card, Button, Badge } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function ProductCard({ product, onAddToCart }) {
+  const navigate = useNavigate();
   if (!product) return null;
 
   // Handle different image formats from backend
@@ -24,8 +25,16 @@ export default function ProductCard({ product, onAddToCart }) {
   const imageUrl = getProductImage(product);
   const productUrl = `/p/${product.slug || product.id}`;
 
+  const handleCardClick = () => {
+    navigate(productUrl);
+  };
+
   return (
-    <Card className="h-100 product-card">
+    <Card
+      className="h-100 product-card shadow-sm border-0"
+      onClick={handleCardClick}
+      style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+    >
       {/* Product Image */}
       <div style={{ height: '200px', overflow: 'hidden', position: 'relative' }}>
         {imageUrl ? (
@@ -33,10 +42,11 @@ export default function ProductCard({ product, onAddToCart }) {
             variant="top"
             src={imageUrl}
             alt={product.name}
-            style={{ 
-              height: '200px', 
-              objectFit: 'cover',
-              width: '100%'
+            style={{
+              height: '200px',
+              objectFit: 'contain',
+              width: '100%',
+              padding: '10px'
             }}
             onError={(e) => {
               // If image fails to load, show placeholder
@@ -45,11 +55,11 @@ export default function ProductCard({ product, onAddToCart }) {
             }}
           />
         ) : null}
-        
+
         {/* Placeholder shown when no image or image fails */}
-        <div 
+        <div
           className="d-flex align-items-center justify-content-center bg-light"
-          style={{ 
+          style={{
             height: '200px',
             display: imageUrl ? 'none' : 'flex',
             position: imageUrl ? 'absolute' : 'static',
@@ -67,60 +77,66 @@ export default function ProductCard({ product, onAddToCart }) {
         </div>
 
         {/* Badges */}
-        {product.oldPrice && product.oldPrice > product.price && (
-          <Badge 
-            bg="danger" 
-            className="position-absolute" 
-            style={{ top: '10px', left: '10px' }}
-          >
-            DEAL
-          </Badge>
-        )}
-        
-        {!product.inStock && (
-          <Badge 
-            bg="secondary" 
-            className="position-absolute" 
-            style={{ top: '10px', right: '10px' }}
-          >
-            Slut
-          </Badge>
-        )}
+        <div className="position-absolute top-0 start-0 w-100 p-2 d-flex justify-content-between pointer-events-none">
+          <div>
+            {product.oldPrice && product.oldPrice > product.price && (
+              <Badge bg="danger" className="me-1">
+                -{Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)}%
+              </Badge>
+            )}
+            {!product.inStock && <Badge bg="secondary">Slut</Badge>}
+          </div>
+        </div>
       </div>
 
-      <Card.Body className="d-flex flex-column">
-        <Card.Title as={Link} to={productUrl} className="text-decoration-none">
-          <h6 className="mb-2 text-dark">{product.name}</h6>
-        </Card.Title>
-        
-        {product.shortDescription && (
-          <Card.Text className="text-muted small flex-grow-1">
-            {product.shortDescription}
-          </Card.Text>
+      <Card.Body className="d-flex flex-column p-3">
+        {/* Brand or Category (optional, good for layout balance) */}
+        {product.category_name && (
+          <small className="text-muted mb-1 text-uppercase" style={{ fontSize: '0.7rem' }}>
+            {product.category_name}
+          </small>
         )}
 
-        {/* Price */}
-        <div className="mb-2">
-          <span className="h6 text-primary mb-0">
-            {product.price} kr
-          </span>
-          {product.oldPrice && product.oldPrice > product.price && (
-            <span className="text-muted text-decoration-line-through ms-2 small">
-              {product.oldPrice} kr
-            </span>
-          )}
-        </div>
+        <Card.Title className="text-decoration-none mb-2">
+          <h6 className="text-dark text-truncate-2-lines" style={{ minHeight: '40px', lineHeight: '1.4' }}>
+            {product.name}
+          </h6>
+        </Card.Title>
 
-        {/* Add to Cart Button */}
-        <Button
-          variant={product.inStock ? "primary" : "outline-secondary"}
-          size="sm"
-          disabled={!product.inStock}
-          onClick={() => onAddToCart && onAddToCart(product)}
-          className="w-100"
-        >
-          {product.inStock ? 'Lägg i varukorg' : 'Slut i lager'}
-        </Button>
+        <div className="mt-auto">
+          {product.oldPrice && product.oldPrice > product.price ? (
+            <div className="mb-2">
+              <span className="d-block text-muted text-decoration-line-through small">
+                {product.oldPrice} kr
+              </span>
+              <span className="h5 text-danger fw-bold">
+                {product.price} kr
+              </span>
+            </div>
+          ) : (
+            <div className="mb-2 h5 fw-bold text-dark">
+              {product.price} kr
+            </div>
+          )}
+
+          <Button
+            variant={product.inStock ? "primary" : "outline-secondary"}
+            size="sm"
+            disabled={!product.inStock}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent card click
+              e.preventDefault();
+              onAddToCart && onAddToCart(product);
+            }}
+            className="w-100 rounded-pill fw-semibold"
+          >
+            {product.inStock ? (
+              <>
+                <i className="bi bi-cart-plus me-1"></i> Lägg i kundvagn
+              </>
+            ) : 'Bevaka'}
+          </Button>
+        </div>
       </Card.Body>
     </Card>
   );

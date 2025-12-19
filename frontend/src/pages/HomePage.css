@@ -1,12 +1,16 @@
 .refined-homepage {
-  background: #ffffff;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  background: transparent;
   min-height: 100vh;
 }
 
-/* Product Carousel specific styles for homepage */
+/* Product Carousel alignment */
 .refined-homepage .product-carousel {
-  padding: 3rem 2rem;
-  background: #ffffff;
+  padding: 0;
+  margin-bottom: 4rem;
+  background: transparent;
 }
 
 .refined-homepage .product-carousel:nth-child(even) {

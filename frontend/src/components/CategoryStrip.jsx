@@ -1,7 +1,9 @@
 // components/CategoryStrip.jsx
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import "./CategoryStrip.css";
 
 // ✅ Import SVGs as URLs (works without any plugin)
 import batteryChargingUrl from "../assets/icon/battery-charging.svg";
@@ -16,11 +18,12 @@ const icons = {
 };
 
 const CATEGORIES = [
-  { id: "outlet",     label: "DEALS",                          emoji: "🏷️" },
-  { id: "computers",  label: "DATORER & KONTOR",               icon: icons.battery },
-  { id: "appliances", label: "VITVAROR",                       icon: icons.cable },
-  { id: "tv",         label: "TV, LJUD & SMART HEM",           icon: icons.tv },
-  { id: "mobile",     label: "MOBILER, TABLETS & SMARTKLOCKOR",icon: icons.mobile },
+  { id: "deals", label: "DEALS", emoji: "🏷️" },
+  { id: "computers", label: "DATORER & KONTOR", icon: icons.battery },
+  { id: "audio", label: "TV, LJUD & SMART HEM", icon: icons.tv },
+  { id: "wearables", label: "MOBILER & SMARTKLOCKOR", icon: icons.mobile },
+  { id: "cameras", label: "KAMEROR & FOTO", emoji: "📷" },
+  { id: "gaming", label: "GAMING", emoji: "🎮" }
 ];
 
 export default function CategoryStrip({ onSelect }) {
@@ -60,11 +63,11 @@ export default function CategoryStrip({ onSelect }) {
 
         <div ref={trackRef} className="cat-track" role="list" aria-label="Kategorier">
           {CATEGORIES.map((c) => (
-            <button
+            <Link
               key={c.id}
-              className="cat-card"
+              to={`/c/${c.id}`}
+              className="cat-card text-decoration-none"
               role="listitem"
-              onClick={() => onSelect?.(c.id)}
               aria-label={c.label}
             >
               <span className="cat-icon" aria-hidden="true">
@@ -77,7 +80,7 @@ export default function CategoryStrip({ onSelect }) {
                 )}
               </span>
               <span className="cat-title">{c.label}</span>
-            </button>
+            </Link>
           ))}
         </div>
 

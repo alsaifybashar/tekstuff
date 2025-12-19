@@ -1,48 +1,145 @@
-.product-card-image-wrapper {
+/* CategoryStrip.css */
+
+.cat-strip-wrap {
+  background-color: transparent;
   width: 100%;
-  height: 200px;         /* fixed uniform height */
+}
+
+.cat-track {
+  display: flex;
+  gap: 2rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 1rem 3rem;
+  /* Add padding for buttons */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
+  white-space: nowrap;
+  align-items: flex-start;
+}
+
+.cat-track::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari */
+}
+
+/* Navigation Buttons */
+.cat-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  background: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;            /* remove extra padding if needed */
+  z-index: 10;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  color: #374151;
 }
 
-.product-card-image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;   /* keeps aspect ratio, fits nicely */
+.cat-nav:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
 }
 
+.cat-nav:disabled {
+  opacity: 0.5;
+  cursor: default;
+  background: #f3f4f6;
+  border-color: #f3f4f6;
+  color: #9ca3af;
+}
+
+.cat-nav.left {
+  left: 0;
+}
+
+.cat-nav.right {
+  right: 0;
+}
+
+/* Category Card */
+.cat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 100px;
+  /* Ensure minimum width */
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.cat-card:hover {
+  transform: translateY(-2px);
+}
 
 .cat-icon {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
+  background: #f3f4f6;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 2rem;
+  color: #4b5563;
+  transition: all 0.2s ease;
 }
 
-.cat-icon svg,
-.cat-icon img {
-  width: 100%;
-  height: 100%;
+.cat-card:hover .cat-icon {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.cat-svg {
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 
-
-
-.trust-badge-icon {
-  flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.cat-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  /* Dark text */
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  text-align: center;
+  white-space: normal;
+  /* Allow wrapping if needed, but flex usually handles it */
+  max-width: 140px;
+  line-height: 1.2;
 }
 
-.trust-badge-icon svg,
-.trust-badge-icon img {
-  width: 60%;   /* keep some padding inside */
-  height: 60%;
-  object-fit: contain;
+/* Fallback letter styling */
+.cat-fallback {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .cat-track {
+    gap: 1.5rem;
+    padding: 1rem 0;
+    /* Full width scroll on mobile */
+  }
+
+  .cat-nav {
+    display: none;
+    /* Hide arrows on mobile, rely on touch scroll */
+  }
 }

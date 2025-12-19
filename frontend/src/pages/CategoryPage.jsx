@@ -11,16 +11,22 @@ import FilterSidebar from "../components/FilterSidebar";
 import ProductGrid from "../components/ProductGrid";
 
 import { useProducts } from "../hooks/useProducts";
+import { useCart } from "../context/CartContext";
 
 export default function CategoryPage() {
   const { categorySlug } = useParams();
-  const [filters, setFilters] = useState({ 
+  const [filters, setFilters] = useState({
     category: categorySlug,
-    sort: "popularity" 
+    sort: "popularity"
   });
 
   // Use backend data with the category filter
   const { products, loading, error } = useProducts(filters);
+  const { addItem } = useCart();
+
+  const handleAddToCart = (product) => {
+    addItem(product);
+  };
 
   const update = (partial) => setFilters(f => ({ ...f, ...partial }));
   const clear = () => setFilters({ category: categorySlug, sort: filters.sort });
@@ -48,11 +54,11 @@ export default function CategoryPage() {
   return (
     <>
       <Navbar />
-      <br/>
+      <br />
       <Container className="py-4">
         {/* Breadcrumb & Header */}
         <div className="small text-muted mb-2">Hem / {categorySlug}</div>
-        
+
         <Row className="mb-4">
           <Col>
             <h1 className="h3 m-0 text-capitalize">
@@ -78,7 +84,7 @@ export default function CategoryPage() {
           {/* Products Grid */}
           <Col lg={9}>
             {products && products.length > 0 ? (
-              <ProductGrid products={products} />
+              <ProductGrid products={products} onAddToCart={handleAddToCart} />
             ) : (
               <Alert variant="info">
                 <h4>Inga produkter hittades</h4>
@@ -91,7 +97,7 @@ export default function CategoryPage() {
           </Col>
         </Row>
       </Container>
-      
+
       <Footer />
     </>
   );

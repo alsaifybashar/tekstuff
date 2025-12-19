@@ -13,10 +13,10 @@ import './HomePage.css';
 
 export default function HomePage() {
   const cart = useCart();
-  
+
   // Use live backend data instead of allProducts import
   const { products: allProducts, loading } = useProducts({ limit: 20 });
-  
+
   // Process products like before
   const featuredDeals = allProducts?.filter(p => p.oldPrice) || [];
   const popularProducts = allProducts?.filter(p => !p.oldPrice) || [];
@@ -44,7 +44,7 @@ export default function HomePage() {
   return (
     <div className="d-flex flex-column min-vh-100">
       <Navbar />
-      
+
       <main className="flex-grow-1">
         <div className="refined-homepage">
           <CategoryStrip onSelect={(id) => console.log("Selected:", id)} />
@@ -57,13 +57,21 @@ export default function HomePage() {
               </>
             }
             description="Upptäck vårt sortiment av laddare, kablar och tillbehör."
+            primaryCTA={{
+              text: "Handla nu",
+              onClick: () => document.getElementById('deals-section')?.scrollIntoView({ behavior: 'smooth' })
+            }}
+            image={{
+              src: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80",
+              alt: "Premium Headphones"
+            }}
           />
 
           {/* Show deals if available */}
           {featuredDeals.length > 0 && (
-            <section>
+            <section id="deals-section">
               <h2>Dagens deals</h2>
-              <ProductCarousel 
+              <ProductCarousel
                 products={featuredDeals}
                 onAddToCart={handleAddToCart}
               />
@@ -74,13 +82,13 @@ export default function HomePage() {
           {popularProducts.length > 0 && (
             <section>
               <h2>Populära produkter</h2>
-              <ProductCarousel 
+              <ProductCarousel
                 products={popularProducts}
                 onAddToCart={handleAddToCart}
               />
             </section>
           )}
-          
+
           {/* Show message if no products */}
           {allProducts.length === 0 && (
             <div className="text-center py-5">
@@ -90,7 +98,7 @@ export default function HomePage() {
           )}
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );

@@ -1,128 +1,105 @@
-## Project desciption
+# TekStuff E-Commerce Project
 
-In this project we are building a webshop that is based on react frontend. The frontend uses `React Bootstrap` components to faster create components. 
+A full-stack e-commerce application built with a React frontend and a Node.js/Express backend. This project features a modern shopping experience with product browsing, cart management, checkout processes (including Stripe integration), and user authentication.
 
+## 🚀 Technology Stack
 
+### Frontend
+*   **Framework:** [React](https://reactjs.org/) (via [Vite](https://vitejs.dev/))
+*   **Styling:** [Bootstrap 5](https://getbootstrap.com/) & [React Bootstrap](https://react-bootstrap.netlify.app/)
+*   **State Management/Data Fetching:** [TanStack Query (React Query)](https://tanstack.com/query/latest)
+*   **Routing:** [React Router](https://reactrouter.com/)
+*   **Icons:** [Lucide React](https://lucide.dev/) & [React Icons](https://react-icons.github.io/react-icons/)
+*   **Animations:** [Framer Motion](https://www.framer.com/motion/)
 
+### Backend
+*   **Runtime:** [Node.js](https://nodejs.org/)
+*   **Framework:** [Express.js](https://expressjs.com/)
+*   **Database:** PostgreSQL (with `pg` driver)
+*   **Authentication:** JWT (JSON Web Tokens) & Sessions
+*   **Payments:** [Stripe](https://stripe.com/)
+*   **Validation:** Joi & Express Validator
+*   **Email:** Nodemailer
 
-## Dependencis
-`npm install react-bootstrap bootstrap`
-`pnpm add react-bootstrap bootstrap`
-`pnpm add react-router-dom`
-`npm install react-icons`
+## 📋 Prerequisites
 
+Before you begin, ensure you have the following installed on your machine:
+*   [Node.js](https://nodejs.org/) (v16+ recommended)
+*   [PostgreSQL](https://www.postgresql.org/)
 
+## 🛠️ Installation & Setup
 
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd tekstuff
+```
 
-# todo
+### 2. Backend Setup
+Navigate to the backend directory, install dependencies, and configure the environment.
 
-## Core Customer-Facing
-Most of the goals under this section is done! Missing the search function whcih will later be added together with the REST API
-- **Home** — `/`
-- **Search results** — `/search?q=…`
-- **Category listing** — `/c/:categorySlug`
-- **Subcategory** — `/c/:categorySlug/:subSlug`
-- **Brand listing** — `/brands` and `/brand/:brandSlug`
-- **Product detail (PDP)** — `/p/:productSlug`  
-  _(gallery, specs, stock, reviews, related)_
-- **Collections / Landing pages** — `/collections/:slug`  
-  _(e.g., “Super Deals”, “Back to school”)_
+```bash
+cd backend
+npm install
+```
 
-## Conversion Funnel
+**Configuration:**
+Create a `.env` file in the `backend` directory based on the example:
+```bash
+cp .env.example .env
+```
+Open `.env` and configure your database credentials, Stripe keys, and JWT secrets. Ensure your PostgreSQL database is running and accessible via the `DATABASE_URL`.
 
-- **Cart** — `/cart`
-- **Checkout**
-  - Shipping — `/checkout/shipping`
-  - Payment — `/checkout/payment`
-  - Review / Place order — `/checkout/review`
-  - Success / Receipt — `/checkout/success/:orderId`
-- _Guest checkout supported on all checkout routes_
+**Run the Backend:**
+```bash
+# Development mode (restarts on changes)
+npm run dev
 
-## Authentication & Account Access
+# Production mode
+npm start
+```
+The server typically runs on `http://localhost:5000`.
 
-- **Login** — `/login`
-- **Signup / Create account** — `/signup`
-- **Logout** — `/logout` _(action-only)_
-- **Forgot password** — `/forgot-password`
-- **Reset password** — `/reset-password/:token`
-- **Email verification** — `/verify-email/:token`
-- **2FA setup/verify (optional)** — `/account/security/2fa`
+### 3. Frontend Setup
+Open a new terminal, navigate to the frontend directory, and install dependencies.
 
-## Customer “My Account” Area
+```bash
+cd frontend
+npm install
+```
 
-- **Dashboard** — `/account`
-- **Profile** — `/account/profile`
-- **Addresses** — `/account/addresses`
-- **Payment methods** — `/account/payments`
-- **Orders** — `/account/orders`
-  - Order detail — `/account/orders/:orderId`
-- **Returns (RMA)** — `/account/returns` and `/account/returns/:rmaId`
-- **Wishlist** — `/account/wishlist`
-- **Notifications & subscriptions** — `/account/notifications`
-- **Saved carts / Recently viewed (optional)** — `/account/saved`
-- **Support tickets (optional)** — `/account/support`
-- **Loyalty / Points (optional)** — `/account/loyalty`
-- **Gift cards (optional)** — `/account/gift-cards`
+**Run the Frontend:**
+```bash
+npm run dev
+```
+The frontend will typically run on `http://localhost:5173` (or the port shown in your terminal).
 
-## Reviews & Community (Optional but Common)
+## 📂 Project Structure
 
-- **Write a review** — `/p/:productSlug/review`
-- **Q&A** — `/p/:productSlug/questions`
+```
+tekstuff/
+├── backend/                # Node.js/Express Server
+│   ├── config/             # Configuration files
+│   ├── controllers/        # Route logic
+│   ├── middleware/         # Express middleware (auth, logging)
+│   ├── routes/             # API routes
+│   └── server.js           # Entry point
+│
+├── frontend/               # React Application
+│   ├── src/
+│   │   ├── pages/          # Application pages (Home, Product, Cart)
+│   │   ├── components/     # Reusable UI components
+│   │   └── ...
+│   └── vite.config.js      # Vite configuration
+│
+└── README.md               # This file
+```
 
-## Content & Info
+## ✨ Key Features (Implemented & Planned)
 
-- **About us** — `/about`
-- **Contact** — `/contact`
-- **Stores / Pickup locations** — `/stores`
-- **Shipping & delivery info** — `/info/shipping`
-- **Returns & warranty** — `/info/returns`
-- **Payment & financing** — `/info/payment`
-- **FAQ** — `/faq`
-- **Blog / Guides / News** — `/blog` and `/blog/:slug`
-- **Careers** — `/careers`
-
-## Legal & Compliance
-
-- **Terms & conditions** — `/legal/terms`
-- **Privacy policy** — `/legal/privacy`
-- **Cookies policy / settings** — `/legal/cookies` and `/cookies`
-- **Accessibility statement** — `/legal/accessibility`
-- **Imprint / Company info** — `/legal/imprint`
-
-## Marketing & SEO Helpers
-
-- **Deals / Super Deals** — `/deals`
-- **New arrivals** — `/new`
-- **Best sellers / Popular** — `/popular`
-- **Compare** — `/compare`  
-  _(with query or state: `/compare?ids=…`)_
-- **Referral / Affiliate landers** — `/r/:code`
-- **Campaign landers** — `/lp/:slug`
-- **Sitemaps** — `/sitemap.xml`, `/robots.txt`, `/.well-known/*`
-
-## System / Utility Pages
-
-- **Email unsubscribe** — `/unsubscribe/:token`
-- **Status messages (optional)** — `/status/:code`
-- **404 Not Found** — `*` _(catch-all)_
-- **500 Error** — `/error`
-
-## Admin / Back Office (if hosted in same app)
-
-- **Dashboard** — `/admin`
-- **Products (CRUD)** — `/admin/products`
-- **Categories** — `/admin/categories`
-- **Orders** — `/admin/orders`
-- **Customers** — `/admin/customers`
-- **Discounts / Coupons** — `/admin/discounts`
-- **Content (CMS, blog)** — `/admin/content`
-- **Banners / Carousels** — `/admin/marketing`
-- **Inventory / Stock** — `/admin/inventory`
-- **Settings** — `/admin/settings`
-
-## B2B (Optional)
-
-- **Business signup** — `/business/signup`
-- **Quotes** — `/account/quotes`
-- **Company accounts & users** — `/account/company`
-- **Tax-exempt / VAT validation** — `/account/tax`
+*   **Product Catalog:** Browse products, categories, brands, and search functionality.
+*   **User Accounts:** Sign up, login, profile management, and order history.
+*   **Shopping Cart:** Add/remove items, update quantities.
+*   **Checkout:** Secure checkout process with shipping and payment integration (Stripe).
+*   **Admin Dashboard:** (Planned) Manage products, orders, and users.
+*   **Responsive Design:** Optimized for mobile and desktop devices.
